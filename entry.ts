@@ -1,6 +1,6 @@
 const canvasWidthHeight = Math.min(Math.min(window.innerHeight, window.innerWidth), 512);
 const GRAVITY = 9.8;
-const GAME_SPEED_X = 80;
+const GAME_SPEED_X = 120;
 const BIRD_FRAME_LIST = [
   './images/frame-1.png',
   './images/frame-2.png',
@@ -9,10 +9,13 @@ const BIRD_FRAME_LIST = [
 ];
 
 let score = 0;
-let gravityOn = false;
+let gravityOn = true;
+//const renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, { backgroundColor: 0xc1c2c4 });
+let canvasWidth = window.innerWidth;
+let canvasHeight = window.innerHeight;
 
 const TUBE_POS_LIST: number[] = [
-  canvasWidthHeight + 50,
+  canvasWidth + 50,
   // We will use only one tube for simplicity!
   //canvasWidthHeight + 350,
   //canvasWidthHeight + 650
@@ -36,12 +39,12 @@ class Bird {
     this.addSpeed(-options.volume);
     if(gravityOn) this.speedY += GRAVITY / 70;
     this.sprite.y += this.speedY;
-    if (this.sprite.y > 480) {
-      this.sprite.y = 480;
+    if (this.sprite.y > canvasHeight - 50) {
+      this.sprite.y = canvasHeight - 50;
       this.speedY = 0;
     }
-    else if (this.sprite.y < 30) {
-      this.sprite.y = 30;
+    else if (this.sprite.y < 150) {
+      this.sprite.y = 150;
       this.speedY = GRAVITY / 70;
     }
   
@@ -56,7 +59,7 @@ class Bird {
       if (d.checkCollision(x - width / 2, y - height / 2, width, height)) isCollide = true;
     });
     // limit bird so that it stays on screen
-    if (y > canvasWidthHeight + height / 2) this.sprite.y = canvasWidthHeight + height / 2;
+    if (y > canvasHeight + height / 2) this.sprite.y = canvasHeight + height / 2;
     if (y < -height / 2) this.sprite.y = -height / 2;
 
     if (isCollide) {
@@ -74,8 +77,8 @@ class Bird {
 
   reset() {
     score = 0;
-    this.sprite.x = canvasWidthHeight / 6;
-    this.sprite.y = canvasWidthHeight / 2.5;
+    this.sprite.x = canvasWidth / 6;
+    this.sprite.y = canvasHeight / 2.5;
     this.speedY = 0;
     this.isDead = false;
   }
@@ -101,12 +104,12 @@ class Tube {
 
   private sprite = new PIXI.Graphics();
 
-  reset(x: number = canvasWidthHeight + 300) {
+  reset(x: number = canvasWidth + 300) {
     this.x = x;
     this.passed = false;
     this.active = false;
     const tubeMinHeight = 60;
-    const randomNum = Math.random() * (canvasWidthHeight - 2 * tubeMinHeight);
+    const randomNum = Math.random() * (canvasHeight - (canvasHeight / 100) * tubeMinHeight);
     this.y = tubeMinHeight + randomNum;
   }
 
@@ -124,11 +127,11 @@ class Tube {
   update() {
     this.x -= GAME_SPEED_X / 60;
     if (this.x < -this.tubeWidth) this.reset();
-    if (this.x < 20 && !this.passed) {
+    if (this.x < canvasWidth / 7 && !this.passed) {
       onTubePass();
       this.passed = true;
     }
-    if(this.x < canvasWidthHeight * .75 && !this.active) {
+    if(this.x < canvasWidth * .5 && !this.active) {
       gravityOn = false; // turn off gravity on approach
       this.active = true;
     }
@@ -136,7 +139,7 @@ class Tube {
     this.sprite.clear();
     this.sprite.beginFill(0xffffff, 1);
     const { x, y, tubeWidth } = this;
-    this.sprite.drawRect(x, y, tubeWidth, canvasWidthHeight);
+    this.sprite.drawRect(x, y, tubeWidth, canvasHeight);
     this.sprite.endFill();
   }
 
