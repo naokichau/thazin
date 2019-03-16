@@ -1,6 +1,6 @@
 // import WaveBell from "wavebell"
 var canvasWidthHeight = Math.min(Math.min(window.innerHeight, window.innerWidth), 512);
-var GRAVITY = 2;
+var GRAVITY = 9.8;
 var GAME_SPEED_X = 80;
 var BIRD_FRAME_LIST = [
     './images/frame-1.png',
@@ -29,9 +29,33 @@ var Bird = /** @class */ (function () {
                 _this.textureCounter = 0;
         };
         this.updateSprite = function () {
-            _this.speedY += GRAVITY / 70;
-            _this.sprite.y += _this.speedY;
-            _this.sprite.rotation = Math.atan(_this.speedY / GAME_SPEED_X);
+            // this.speedY += GRAVITY / 70;
+            // this.sprite.y += this.speedY;
+            // this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
+            // let isCollide = false;
+            // const { x, y, width, height } = this.sprite;
+            // this.tubeList.forEach(d => {
+            //   if (d.checkCollision(x - width / 2, y - height / 2, width, height)) isCollide = true;
+            // });
+            // if (y < -height / 2 || y > canvasWidthHeight + height / 2) isCollide = true;
+            // if (isCollide) {
+            //   this.onCollision();
+            //   this.isDied = true;
+            // }
+            console.log("Updaated");
+        };
+        stage.addChild(this.sprite);
+        this.sprite.anchor.set(0.5, 0.5);
+        this.updateTexture();
+        this.sprite.scale.x = 0.06;
+        this.sprite.scale.y = 0.06;
+        this.reset();
+        // document.addEventListener('keydown', e => {
+        //   if (e.keyCode == 32) this.addSpeed(-GRAVITY / 3);
+        // });
+        setInterval(function () {
+            _this.sprite.y += -(options.volume - 0.2) * 20;
+            _this.sprite.rotation = Math.atan(-options.volume * 10 - 0.01 / GAME_SPEED_X);
             var isCollide = false;
             var _a = _this.sprite, x = _a.x, y = _a.y, width = _a.width, height = _a.height;
             _this.tubeList.forEach(function (d) {
@@ -44,18 +68,9 @@ var Bird = /** @class */ (function () {
                 _this.onCollision();
                 _this.isDied = true;
             }
-        };
-        stage.addChild(this.sprite);
-        this.sprite.anchor.set(0.5, 0.5);
-        this.updateTexture();
-        this.sprite.scale.x = 0.06;
-        this.sprite.scale.y = 0.06;
-        this.reset();
-        document.addEventListener('keydown', function (e) {
-            if (e.keyCode == 32)
-                _this.addSpeed(-GRAVITY / 3);
-        });
-        stage.on('pointerdown', function () { return _this.addSpeed(-GRAVITY / 3); });
+            // this.addSpeed(-*4)
+        }, 50);
+        // stage.on('pointerdown', () => this.addSpeed(-GRAVITY / 3))
         setInterval(this.updateTexture, 200);
     }
     Bird.prototype.addSpeed = function (speedInc) {
@@ -148,6 +163,74 @@ button.addEventListener('click', function () {
     }
     button.classList.add('hide');
 });
+var audioContext;
+var mediaStreamSource = null;
+var meter = null;
+function beginDetect() {
+    audioContext = new AudioContext();
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+            mediaStreamSource = audioContext.createMediaStreamSource(stream);
+            meter = createAudioMeter(audioContext);
+            mediaStreamSource.connect(meter);
+        });
+    }
+}
+var options = {
+    clipping: false,
+    lastClip: 0,
+    volume: 0,
+    clipLevel: 0.98,
+    averaging: 0.95,
+    clipLag: 750
+};
+var checkClipping = function () {
+    if (!options.clipping) {
+        return false;
+    }
+    if ((options.lastClip + options.clipLag) < performance.now()) {
+        options.clipping = false;
+    }
+    return options.clipping;
+};
+var shutdown = function () {
+    this.disconnect();
+    this.onaudioprocess = null;
+};
+function createAudioMeter(audioContext, clipLevel, averaging, clipLag) {
+    var processor = audioContext.createScriptProcessor(512);
+    processor.onaudioprocess = volumeAudioProcess;
+    options.clipLevel = clipLevel || options.clipLevel;
+    options.averaging = averaging || options.averaging;
+    options.clipLag = clipLag || options.clipLag;
+    // this will have no effect, since we don't copy the input to the output,
+    // but works around a current Chrome bug.
+    processor.connect(audioContext.destination);
+    return processor;
+}
+var outputArray = [];
+function volumeAudioProcess(event) {
+    var buf = event.inputBuffer.getChannelData(0);
+    var bufLength = buf.length;
+    var sum = 0;
+    var x;
+    // Do a root-mean-square on the samples: sum up the squares...
+    for (var i = 0; i < bufLength; i++) {
+        x = buf[i];
+        if (Math.abs(x) >= options.clipLevel) {
+            options.clipping = true;
+            options.lastClip = window.performance.now();
+        }
+        sum += x * x;
+    }
+    // ... then take the square root of the sum.
+    var rms = Math.sqrt(sum / bufLength);
+    // Now smooth this out with the averaging factor applied
+    // to the previous sample - take the max here because we
+    // want "fast attack, slow release."
+    options.volume = Math.max(rms, options.volume * options.averaging);
+    document.getElementById('audio-value').innerHTML = options.volume.toFixed(2);
+}
 // var bell = new WaveBell();
 // bell.on('wave', function (e) {
 //   // draw oscilloscope
@@ -161,3 +244,4 @@ button.addEventListener('click', function () {
 // });
 // // 25 frames per second
 // bell.start(1000 / 25);
+beginDetect();

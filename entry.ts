@@ -2,7 +2,7 @@
 // import WaveBell from "wavebell"
 
 const canvasWidthHeight = Math.min(Math.min(window.innerHeight, window.innerWidth), 512);
-const GRAVITY = 2;
+const GRAVITY = 9.8;
 const GAME_SPEED_X = 80;
 const BIRD_FRAME_LIST = [
   './images/frame-1.png',
@@ -22,6 +22,7 @@ class Bird {
 
   private textureCounter: number = 0;
   private updateTexture = () => {
+   
     if (this.isDied) return;
     this.sprite.texture = PIXI.loader.resources[BIRD_FRAME_LIST[this.textureCounter++]].texture;
 
@@ -29,21 +30,22 @@ class Bird {
   }
 
   updateSprite = () => {
-    this.speedY += GRAVITY / 70;
-    this.sprite.y += this.speedY;
-    this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
+    // this.speedY += GRAVITY / 70;
+    // this.sprite.y += this.speedY;
+    // this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
 
-    let isCollide = false;
-    const { x, y, width, height } = this.sprite;
-    this.tubeList.forEach(d => {
-      if (d.checkCollision(x - width / 2, y - height / 2, width, height)) isCollide = true;
-    });
-    if (y < -height / 2 || y > canvasWidthHeight + height / 2) isCollide = true;
+    // let isCollide = false;
+    // const { x, y, width, height } = this.sprite;
+    // this.tubeList.forEach(d => {
+    //   if (d.checkCollision(x - width / 2, y - height / 2, width, height)) isCollide = true;
+    // });
+    // if (y < -height / 2 || y > canvasWidthHeight + height / 2) isCollide = true;
 
-    if (isCollide) {
-      this.onCollision();
-      this.isDied = true;
-    }
+    // if (isCollide) {
+    //   this.onCollision();
+    //   this.isDied = true;
+    // }
+    console.log("Updaated")
   }
 
   addSpeed(speedInc: number) {
@@ -57,7 +59,7 @@ class Bird {
     this.speedY = 0;
     this.isDied = false;
   }
-
+  
   constructor(stage: PIXI.Container, readonly tubeList: Tube[], readonly onCollision: () => void) {
     stage.addChild(this.sprite);
     this.sprite.anchor.set(0.5, 0.5);
@@ -66,10 +68,30 @@ class Bird {
     this.sprite.scale.y = 0.06;
     this.reset();
 
-    document.addEventListener('keydown', e => {
-      if (e.keyCode == 32) this.addSpeed(-GRAVITY / 3);
-    });
-    stage.on('pointerdown', () => this.addSpeed(-GRAVITY / 3))
+    // document.addEventListener('keydown', e => {
+    //   if (e.keyCode == 32) this.addSpeed(-GRAVITY / 3);
+    // });
+  
+    setInterval(()=>{
+      this.sprite.y +=-( options.volume-0.2)*20;
+      this.sprite.rotation = Math.atan(-options.volume*10-0.01 / GAME_SPEED_X);
+  
+      let isCollide = false;
+      const { x, y, width, height } = this.sprite;
+      this.tubeList.forEach(d => {
+        if (d.checkCollision(x - width / 2, y - height / 2, width, height)) isCollide = true;
+      });
+      if (y < -height / 2 || y > canvasWidthHeight + height / 2) isCollide = true;
+  
+      if (isCollide) {
+        this.onCollision();
+        this.isDied = true;
+      }
+      
+      // this.addSpeed(-*4)
+    }
+      , 50)
+    // stage.on('pointerdown', () => this.addSpeed(-GRAVITY / 3))
 
     setInterval(this.updateTexture, 200);
   }
@@ -165,6 +187,89 @@ button.addEventListener('click', () => {
 });
 
 
+var audioContext;
+var mediaStreamSource = null
+var meter = null
+
+function beginDetect() {
+  audioContext = new AudioContext()
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({audio: true}).then((stream) => {
+      mediaStreamSource = audioContext.createMediaStreamSource(stream)
+      meter = createAudioMeter(audioContext)
+      mediaStreamSource.connect(meter)
+    })
+  }
+}
+
+let options = {
+  clipping: false,
+  lastClip: 0,
+  volume: 0,
+  clipLevel: 0.98,
+  averaging: 0.95,
+  clipLag: 750
+}
+
+var checkClipping = function () {
+  if (!options.clipping) {
+    return false
+  }
+  if ((options.lastClip + options.clipLag) < performance.now()) {
+    options.clipping = false
+  }
+  return options.clipping
+}
+
+var shutdown = function () {
+  this.disconnect()
+  this.onaudioprocess = null
+}
+
+
+function createAudioMeter(audioContext: AudioContext, clipLevel?: number, averaging?: number, clipLag?: number) {
+  const processor = audioContext.createScriptProcessor(512)
+  processor.onaudioprocess = volumeAudioProcess
+
+  options.clipLevel = clipLevel || options.clipLevel
+  options.averaging = averaging || options.averaging
+  options.clipLag = clipLag || options.clipLag
+
+  // this will have no effect, since we don't copy the input to the output,
+  // but works around a current Chrome bug.
+  processor.connect(audioContext.destination)
+  return processor
+}
+
+var outputArray = [];
+
+function volumeAudioProcess(event) {
+  const buf = event.inputBuffer.getChannelData(0)
+  const bufLength = buf.length
+  let sum = 0
+  let x
+
+  // Do a root-mean-square on the samples: sum up the squares...
+  for (var i = 0; i < bufLength; i++) {
+    x = buf[i]
+    if (Math.abs(x) >= options.clipLevel) {
+        options.clipping = true
+        options.lastClip = window.performance.now()
+    }
+    sum += x * x
+  }
+
+  // ... then take the square root of the sum.
+  const rms = Math.sqrt(sum / bufLength)
+
+  // Now smooth this out with the averaging factor applied
+  // to the previous sample - take the max here because we
+  // want "fast attack, slow release."
+  options.volume = Math.max(rms, options.volume * options.averaging)
+  document.getElementById('audio-value').innerHTML = options.volume.toFixed(2)
+}
+
+
 // var bell = new WaveBell();
 
 // bell.on('wave', function (e) {
@@ -181,3 +286,5 @@ button.addEventListener('click', () => {
 
 // // 25 frames per second
 // bell.start(1000 / 25);
+
+beginDetect();
