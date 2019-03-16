@@ -44,16 +44,10 @@ class Bird {
       this.sprite.y = 30;
       this.speedY = GRAVITY / 70;
     }
-<<<<<<< HEAD
-    
   
     if(gravityOn) this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
     else this.sprite.rotation = 0;
-=======
 
-
-    this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
->>>>>>> cb79fb26c964038a3e335b805364fbeaf65114bc
     this.lastY = this.sprite.y;
     let isCollide = false;
     const { x, y, width, height } = this.sprite;
@@ -152,8 +146,6 @@ class Tube {
   }
 }
 
-<<<<<<< HEAD
-
 // This function will be called when the bird passes a tube fully.
 function onTubePass() {
   score++;
@@ -162,10 +154,8 @@ function onTubePass() {
 }
 
 // const renderer = PIXI.autoDetectRenderer(canvasWidthHeight, canvasWidthHeight, { backgroundColor: 0xc1c2c4 });
-const renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight - 100, { backgroundColor: 0xc1c2c4 });
-=======
 const renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, { backgroundColor: 0xc1c2c4 });
->>>>>>> cb79fb26c964038a3e335b805364fbeaf65114bc
+
 document.body.appendChild(renderer.view);
 const stage = new PIXI.Container();
 stage.interactive = true;

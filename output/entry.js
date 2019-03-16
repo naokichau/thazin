@@ -140,7 +140,7 @@ function onTubePass() {
     gravityOn = true;
 }
 // const renderer = PIXI.autoDetectRenderer(canvasWidthHeight, canvasWidthHeight, { backgroundColor: 0xc1c2c4 });
-var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight - 100, { backgroundColor: 0xc1c2c4 });
+var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, { backgroundColor: 0xc1c2c4 });
 document.body.appendChild(renderer.view);
 var stage = new PIXI.Container();
 stage.interactive = true;
