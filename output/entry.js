@@ -66,8 +66,8 @@ var Bird = /** @class */ (function () {
         stage.addChild(this.sprite);
         this.sprite.anchor.set(0.5, 0.5);
         this.updateTexture();
-        this.sprite.scale.x = 0.06;
-        this.sprite.scale.y = 0.06;
+        this.sprite.scale.x = 0.1;
+        this.sprite.scale.y = 0.1;
         this.reset();
         setInterval(this.updateTexture, 200);
     }
@@ -134,7 +134,6 @@ var Tube = /** @class */ (function () {
     };
     return Tube;
 }());
-// This function will be called when the bird passes a tube fully.
 function onTubePass() {
     score++;
     document.getElementById('scoreP').innerHTML = "" + score;
