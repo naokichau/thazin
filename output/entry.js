@@ -134,7 +134,6 @@ var Tube = /** @class */ (function () {
     };
     return Tube;
 }());
-// This function will be called when the bird passes a tube fully.
 function onTubePass() {
     score++;
     document.getElementById('scoreP').innerHTML = "" + score;
