@@ -44,10 +44,16 @@ class Bird {
       this.sprite.y = 30;
       this.speedY = GRAVITY / 70;
     }
+<<<<<<< HEAD
     
   
     if(gravityOn) this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
     else this.sprite.rotation = 0;
+=======
+
+
+    this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
+>>>>>>> cb79fb26c964038a3e335b805364fbeaf65114bc
     this.lastY = this.sprite.y;
     let isCollide = false;
     const { x, y, width, height } = this.sprite;
@@ -56,9 +62,9 @@ class Bird {
       if (d.checkCollision(x - width / 2, y - height / 2, width, height)) isCollide = true;
     });
     // limit bird so that it stays on screen
-    if(y > canvasWidthHeight + height / 2) this.sprite.y = canvasWidthHeight + height / 2;
-    if(y < -height / 2) this.sprite.y = -height / 2;
-    
+    if (y > canvasWidthHeight + height / 2) this.sprite.y = canvasWidthHeight + height / 2;
+    if (y < -height / 2) this.sprite.y = -height / 2;
+
     if (isCollide) {
       this.onCollision();
       this.isDead = true;
@@ -84,8 +90,8 @@ class Bird {
     stage.addChild(this.sprite);
     this.sprite.anchor.set(0.5, 0.5);
     this.updateTexture();
-    this.sprite.scale.x = 0.06;
-    this.sprite.scale.y = 0.06;
+    this.sprite.scale.x = 0.1;
+    this.sprite.scale.y = 0.1;
     this.reset();
 
     setInterval(this.updateTexture, 200);
@@ -135,7 +141,7 @@ class Tube {
 
     this.sprite.clear();
     this.sprite.beginFill(0xffffff, 1);
-    const { x, y, tubeWidth} = this;
+    const { x, y, tubeWidth } = this;
     this.sprite.drawRect(x, y, tubeWidth, canvasWidthHeight);
     this.sprite.endFill();
   }
@@ -146,6 +152,7 @@ class Tube {
   }
 }
 
+<<<<<<< HEAD
 
 // This function will be called when the bird passes a tube fully.
 function onTubePass() {
@@ -156,6 +163,9 @@ function onTubePass() {
 
 // const renderer = PIXI.autoDetectRenderer(canvasWidthHeight, canvasWidthHeight, { backgroundColor: 0xc1c2c4 });
 const renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight - 100, { backgroundColor: 0xc1c2c4 });
+=======
+const renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, { backgroundColor: 0xc1c2c4 });
+>>>>>>> cb79fb26c964038a3e335b805364fbeaf65114bc
 document.body.appendChild(renderer.view);
 const stage = new PIXI.Container();
 stage.interactive = true;
