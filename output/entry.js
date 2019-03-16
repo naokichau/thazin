@@ -10,8 +10,8 @@ var BIRD_FRAME_LIST = [
 ];
 var TUBE_POS_LIST = [
     canvasWidthHeight + 50,
-    canvasWidthHeight + 250,
-    canvasWidthHeight + 480
+    canvasWidthHeight + 350,
+    canvasWidthHeight + 650
 ];
 var Bird = /** @class */ (function () {
     function Bird(stage, tubeList, onCollision) {
@@ -41,17 +41,16 @@ var Bird = /** @class */ (function () {
                 _this.sprite.y = 30;
                 _this.speedY = GRAVITY / 70;
             }
-            _this.sprite.rotation = Math.atan(_this.speedY / GAME_SPEED_X); // fix this lol
+            _this.sprite.rotation = Math.atan(_this.speedY / GAME_SPEED_X);
             _this.lastY = _this.sprite.y;
             var isCollide = false;
             var _a = _this.sprite, x = _a.x, y = _a.y, width = _a.width, height = _a.height;
-            // Can use this later for object collision
+            // object collision
             _this.tubeList.forEach(function (d) {
                 if (d.checkCollision(x - width / 2, y - height / 2, width, height))
                     isCollide = true;
             });
-            if (y < -height / 2 || y > canvasWidthHeight + height / 2)
-                isCollide = true;
+            // limit bird so that it stays on screen
             if (y > canvasWidthHeight + height / 2)
                 _this.sprite.y = canvasWidthHeight + height / 2;
             if (y < -height / 2)
@@ -60,7 +59,6 @@ var Bird = /** @class */ (function () {
                 _this.onCollision();
                 _this.isDead = true;
             }
-            console.log("Updated");
         };
         stage.addChild(this.sprite);
         this.sprite.anchor.set(0.5, 0.5);
@@ -68,10 +66,6 @@ var Bird = /** @class */ (function () {
         this.sprite.scale.x = 0.06;
         this.sprite.scale.y = 0.06;
         this.reset();
-        // document.addEventListener('keydown', e => {
-        //   if (e.keyCode == 32) this.addSpeed(-GRAVITY / 3);
-        // });
-        // stage.on('pointerdown', () => this.addSpeed(-GRAVITY / 3))
         setInterval(this.updateTexture, 200);
     }
     Bird.prototype.addSpeed = function (speedInc) {
@@ -90,7 +84,6 @@ var Bird = /** @class */ (function () {
 }());
 var Tube = /** @class */ (function () {
     function Tube(stage, x) {
-        this.innerDistance = 120;
         this.tubeWidth = 25;
         this.sprite = new PIXI.Graphics();
         stage.addChild(this.sprite);
@@ -100,14 +93,15 @@ var Tube = /** @class */ (function () {
         if (x === void 0) { x = canvasWidthHeight + 300; }
         this.x = x;
         var tubeMinHeight = 60;
-        var randomNum = Math.random() * (canvasWidthHeight - 2 * tubeMinHeight - this.innerDistance);
+        var randomNum = Math.random() * (canvasWidthHeight - 2 * tubeMinHeight);
         this.y = tubeMinHeight + randomNum;
     };
     Tube.prototype.checkCollision = function (x, y, width, height) {
-        if (!(x + width < this.x || this.x + this.tubeWidth < x || this.y < y)) {
-            return true;
-        }
-        if (!(x + width < this.x || this.x + this.tubeWidth < x || y + height < this.y + this.innerDistance)) {
+        // if (!(x + width < this.x || this.x + this.tubeWidth < x || this.y < y)) {
+        //   console.log("whaa");
+        //   return true;
+        // }
+        if (!(x + width < this.x || this.x + this.tubeWidth < x || y + height < this.y)) {
             return true;
         }
         return false;
@@ -118,9 +112,8 @@ var Tube = /** @class */ (function () {
             this.reset();
         this.sprite.clear();
         this.sprite.beginFill(0xffffff, 1);
-        var _a = this, x = _a.x, y = _a.y, tubeWidth = _a.tubeWidth, innerDistance = _a.innerDistance;
-        this.sprite.drawRect(x, 0, tubeWidth, y);
-        this.sprite.drawRect(x, y + innerDistance, tubeWidth, canvasWidthHeight);
+        var _a = this, x = _a.x, y = _a.y, tubeWidth = _a.tubeWidth;
+        this.sprite.drawRect(x, y, tubeWidth, canvasWidthHeight);
         this.sprite.endFill();
     };
     return Tube;

@@ -10,10 +10,11 @@ const BIRD_FRAME_LIST = [
   './images/frame-3.png',
   './images/frame-4.png',
 ];
+
 const TUBE_POS_LIST: number[] = [
   canvasWidthHeight + 50,
-  canvasWidthHeight + 250,
-  canvasWidthHeight + 480
+  canvasWidthHeight + 350,
+  canvasWidthHeight + 650
 ];
 class Bird {
   private speedY: number = 0;
@@ -44,24 +45,22 @@ class Bird {
     }
     
   
-    this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X); // fix this lol
+    this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
     this.lastY = this.sprite.y;
     let isCollide = false;
     const { x, y, width, height } = this.sprite;
-    // Can use this later for object collision
+    // object collision
     this.tubeList.forEach(d => {
       if (d.checkCollision(x - width / 2, y - height / 2, width, height)) isCollide = true;
     });
-    if (y < -height / 2 || y > canvasWidthHeight + height / 2) isCollide = true;
+    // limit bird so that it stays on screen
     if(y > canvasWidthHeight + height / 2) this.sprite.y = canvasWidthHeight + height / 2;
-    
     if(y < -height / 2) this.sprite.y = -height / 2;
-
+    
     if (isCollide) {
       this.onCollision();
       this.isDead = true;
     }
-    console.log("Updated")
   }
 
   addSpeed(speedInc: number) {
@@ -86,12 +85,6 @@ class Bird {
     this.sprite.scale.y = 0.06;
     this.reset();
 
-    // document.addEventListener('keydown', e => {
-    //   if (e.keyCode == 32) this.addSpeed(-GRAVITY / 3);
-    // });
-  
-    // stage.on('pointerdown', () => this.addSpeed(-GRAVITY / 3))
-
     setInterval(this.updateTexture, 200);
   }
 }
@@ -99,7 +92,6 @@ class Bird {
 class Tube {
   private x: number;
   private y: number;
-  private innerDistance = 120;
   private tubeWidth = 25;
 
   private sprite = new PIXI.Graphics();
@@ -108,15 +100,16 @@ class Tube {
     this.x = x;
 
     const tubeMinHeight = 60;
-    const randomNum = Math.random() * (canvasWidthHeight - 2 * tubeMinHeight - this.innerDistance);
+    const randomNum = Math.random() * (canvasWidthHeight - 2 * tubeMinHeight);
     this.y = tubeMinHeight + randomNum;
   }
 
   checkCollision(x: number, y: number, width: number, height: number) {
-    if (!(x + width < this.x || this.x + this.tubeWidth < x || this.y < y)) {
-      return true;
-    }
-    if (!(x + width < this.x || this.x + this.tubeWidth < x || y + height < this.y + this.innerDistance)) {
+    // if (!(x + width < this.x || this.x + this.tubeWidth < x || this.y < y)) {
+    //   console.log("whaa");
+    //   return true;
+    // }
+    if (!(x + width < this.x || this.x + this.tubeWidth < x || y + height < this.y)) {
       return true;
     }
     return false;
@@ -128,9 +121,8 @@ class Tube {
 
     this.sprite.clear();
     this.sprite.beginFill(0xffffff, 1);
-    const { x, y, tubeWidth, innerDistance } = this;
-    this.sprite.drawRect(x, 0, tubeWidth, y);
-    this.sprite.drawRect(x, y + innerDistance, tubeWidth, canvasWidthHeight);
+    const { x, y, tubeWidth} = this;
+    this.sprite.drawRect(x, y, tubeWidth, canvasWidthHeight);
     this.sprite.endFill();
   }
 
