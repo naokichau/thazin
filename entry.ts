@@ -18,46 +18,64 @@ const TUBE_POS_LIST: number[] = [
 class Bird {
   private speedY: number = 0;
   private sprite = new PIXI.Sprite();
-  private isDied: boolean;
+  private isDead: boolean;
 
   private textureCounter: number = 0;
+  private lastY: number = 0;
   private updateTexture = () => {
    
-    if (this.isDied) return;
+    if (this.isDead) return;
     this.sprite.texture = PIXI.loader.resources[BIRD_FRAME_LIST[this.textureCounter++]].texture;
 
     if (this.textureCounter === BIRD_FRAME_LIST.length) this.textureCounter = 0;
   }
 
   updateSprite = () => {
-    // this.speedY += GRAVITY / 70;
-    // this.sprite.y += this.speedY;
-    // this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
+    this.addSpeed(-options.volume);
+    this.speedY += GRAVITY / 70;
+    this.sprite.y += this.speedY;
+    if(this.sprite.y > 480) {
+      this.sprite.y = 480;
+      this.speedY = 0;
+    }
+    else if(this.sprite.y < 30) {
+      this.sprite.y = 30;
+      this.speedY = GRAVITY / 70;
+    }
+    
+  
+    this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X); // fix this lol
+    this.lastY = this.sprite.y;
+    let isCollide = false;
+    const { x, y, width, height } = this.sprite;
+    // Can use this later for object collision
+    this.tubeList.forEach(d => {
+      if (d.checkCollision(x - width / 2, y - height / 2, width, height)) isCollide = true;
+    });
+    if (y < -height / 2 || y > canvasWidthHeight + height / 2) isCollide = true;
+    if(y > canvasWidthHeight + height / 2) this.sprite.y = canvasWidthHeight + height / 2;
+    
+    if(y < -height / 2) this.sprite.y = -height / 2;
 
-    // let isCollide = false;
-    // const { x, y, width, height } = this.sprite;
-    // this.tubeList.forEach(d => {
-    //   if (d.checkCollision(x - width / 2, y - height / 2, width, height)) isCollide = true;
-    // });
-    // if (y < -height / 2 || y > canvasWidthHeight + height / 2) isCollide = true;
-
-    // if (isCollide) {
-    //   this.onCollision();
-    //   this.isDied = true;
-    // }
-    console.log("Updaated")
+    if (isCollide) {
+      this.onCollision();
+      this.isDead = true;
+    }
+    console.log("Updated")
   }
 
   addSpeed(speedInc: number) {
-    this.speedY += speedInc;
-    this.speedY = Math.max(-GRAVITY, this.speedY);
+    if(!(this.sprite.y < 80)) {
+      this.speedY += speedInc;
+      this.speedY = Math.max(-GRAVITY / 3.5, this.speedY);
+    }
   }
 
   reset() {
     this.sprite.x = canvasWidthHeight / 6;
     this.sprite.y = canvasWidthHeight / 2.5;
     this.speedY = 0;
-    this.isDied = false;
+    this.isDead = false;
   }
   
   constructor(stage: PIXI.Container, readonly tubeList: Tube[], readonly onCollision: () => void) {
@@ -72,25 +90,6 @@ class Bird {
     //   if (e.keyCode == 32) this.addSpeed(-GRAVITY / 3);
     // });
   
-    setInterval(()=>{
-      this.sprite.y +=-( options.volume-0.2)*20;
-      this.sprite.rotation = Math.atan(-options.volume*10-0.01 / GAME_SPEED_X);
-  
-      let isCollide = false;
-      const { x, y, width, height } = this.sprite;
-      this.tubeList.forEach(d => {
-        if (d.checkCollision(x - width / 2, y - height / 2, width, height)) isCollide = true;
-      });
-      if (y < -height / 2 || y > canvasWidthHeight + height / 2) isCollide = true;
-  
-      if (isCollide) {
-        this.onCollision();
-        this.isDied = true;
-      }
-      
-      // this.addSpeed(-*4)
-    }
-      , 50)
     // stage.on('pointerdown', () => this.addSpeed(-GRAVITY / 3))
 
     setInterval(this.updateTexture, 200);
@@ -186,6 +185,7 @@ button.addEventListener('click', () => {
   button.classList.add('hide');
 });
 
+// BEGIN AUDIO CONTROL CODE
 
 var audioContext;
 var mediaStreamSource = null
@@ -207,7 +207,7 @@ let options = {
   lastClip: 0,
   volume: 0,
   clipLevel: 0.98,
-  averaging: 0.95,
+  averaging: 0.97,
   clipLag: 750
 }
 
@@ -241,8 +241,6 @@ function createAudioMeter(audioContext: AudioContext, clipLevel?: number, averag
   return processor
 }
 
-var outputArray = [];
-
 function volumeAudioProcess(event) {
   const buf = event.inputBuffer.getChannelData(0)
   const bufLength = buf.length
@@ -256,7 +254,7 @@ function volumeAudioProcess(event) {
         options.clipping = true
         options.lastClip = window.performance.now()
     }
-    sum += x * x
+    sum += x * x * 2
   }
 
   // ... then take the square root of the sum.

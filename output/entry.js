@@ -21,28 +21,46 @@ var Bird = /** @class */ (function () {
         this.speedY = 0;
         this.sprite = new PIXI.Sprite();
         this.textureCounter = 0;
+        this.lastY = 0;
         this.updateTexture = function () {
-            if (_this.isDied)
+            if (_this.isDead)
                 return;
             _this.sprite.texture = PIXI.loader.resources[BIRD_FRAME_LIST[_this.textureCounter++]].texture;
             if (_this.textureCounter === BIRD_FRAME_LIST.length)
                 _this.textureCounter = 0;
         };
         this.updateSprite = function () {
-            // this.speedY += GRAVITY / 70;
-            // this.sprite.y += this.speedY;
-            // this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
-            // let isCollide = false;
-            // const { x, y, width, height } = this.sprite;
-            // this.tubeList.forEach(d => {
-            //   if (d.checkCollision(x - width / 2, y - height / 2, width, height)) isCollide = true;
-            // });
-            // if (y < -height / 2 || y > canvasWidthHeight + height / 2) isCollide = true;
-            // if (isCollide) {
-            //   this.onCollision();
-            //   this.isDied = true;
-            // }
-            console.log("Updaated");
+            _this.addSpeed(-options.volume);
+            _this.speedY += GRAVITY / 70;
+            _this.sprite.y += _this.speedY;
+            if (_this.sprite.y > 480) {
+                _this.sprite.y = 480;
+                _this.speedY = 0;
+            }
+            else if (_this.sprite.y < 30) {
+                _this.sprite.y = 30;
+                _this.speedY = GRAVITY / 70;
+            }
+            _this.sprite.rotation = Math.atan(_this.speedY / GAME_SPEED_X); // fix this lol
+            _this.lastY = _this.sprite.y;
+            var isCollide = false;
+            var _a = _this.sprite, x = _a.x, y = _a.y, width = _a.width, height = _a.height;
+            // Can use this later for object collision
+            _this.tubeList.forEach(function (d) {
+                if (d.checkCollision(x - width / 2, y - height / 2, width, height))
+                    isCollide = true;
+            });
+            if (y < -height / 2 || y > canvasWidthHeight + height / 2)
+                isCollide = true;
+            if (y > canvasWidthHeight + height / 2)
+                _this.sprite.y = canvasWidthHeight + height / 2;
+            if (y < -height / 2)
+                _this.sprite.y = -height / 2;
+            if (isCollide) {
+                _this.onCollision();
+                _this.isDead = true;
+            }
+            console.log("Updated");
         };
         stage.addChild(this.sprite);
         this.sprite.anchor.set(0.5, 0.5);
@@ -53,35 +71,20 @@ var Bird = /** @class */ (function () {
         // document.addEventListener('keydown', e => {
         //   if (e.keyCode == 32) this.addSpeed(-GRAVITY / 3);
         // });
-        setInterval(function () {
-            _this.sprite.y += -(options.volume - 0.2) * 20;
-            _this.sprite.rotation = Math.atan(-options.volume * 10 - 0.01 / GAME_SPEED_X);
-            var isCollide = false;
-            var _a = _this.sprite, x = _a.x, y = _a.y, width = _a.width, height = _a.height;
-            _this.tubeList.forEach(function (d) {
-                if (d.checkCollision(x - width / 2, y - height / 2, width, height))
-                    isCollide = true;
-            });
-            if (y < -height / 2 || y > canvasWidthHeight + height / 2)
-                isCollide = true;
-            if (isCollide) {
-                _this.onCollision();
-                _this.isDied = true;
-            }
-            // this.addSpeed(-*4)
-        }, 50);
         // stage.on('pointerdown', () => this.addSpeed(-GRAVITY / 3))
         setInterval(this.updateTexture, 200);
     }
     Bird.prototype.addSpeed = function (speedInc) {
-        this.speedY += speedInc;
-        this.speedY = Math.max(-GRAVITY, this.speedY);
+        if (!(this.sprite.y < 80)) {
+            this.speedY += speedInc;
+            this.speedY = Math.max(-GRAVITY / 3.5, this.speedY);
+        }
     };
     Bird.prototype.reset = function () {
         this.sprite.x = canvasWidthHeight / 6;
         this.sprite.y = canvasWidthHeight / 2.5;
         this.speedY = 0;
-        this.isDied = false;
+        this.isDead = false;
     };
     return Bird;
 }());
@@ -163,6 +166,7 @@ button.addEventListener('click', function () {
     }
     button.classList.add('hide');
 });
+// BEGIN AUDIO CONTROL CODE
 var audioContext;
 var mediaStreamSource = null;
 var meter = null;
@@ -181,7 +185,7 @@ var options = {
     lastClip: 0,
     volume: 0,
     clipLevel: 0.98,
-    averaging: 0.95,
+    averaging: 0.97,
     clipLag: 750
 };
 var checkClipping = function () {
@@ -208,7 +212,6 @@ function createAudioMeter(audioContext, clipLevel, averaging, clipLag) {
     processor.connect(audioContext.destination);
     return processor;
 }
-var outputArray = [];
 function volumeAudioProcess(event) {
     var buf = event.inputBuffer.getChannelData(0);
     var bufLength = buf.length;
@@ -221,7 +224,7 @@ function volumeAudioProcess(event) {
             options.clipping = true;
             options.lastClip = window.performance.now();
         }
-        sum += x * x;
+        sum += x * x * 2;
     }
     // ... then take the square root of the sum.
     var rms = Math.sqrt(sum / bufLength);
