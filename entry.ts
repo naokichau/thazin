@@ -8,10 +8,14 @@ const BIRD_FRAME_LIST = [
   './images/frame-4.png',
 ];
 
+let score = 0;
+let gravityOn = false;
+
 const TUBE_POS_LIST: number[] = [
   canvasWidthHeight + 50,
-  canvasWidthHeight + 350,
-  canvasWidthHeight + 650
+  // We will use only one tube for simplicity!
+  //canvasWidthHeight + 350,
+  //canvasWidthHeight + 650
 ];
 class Bird {
   private speedY: number = 0;
@@ -30,7 +34,7 @@ class Bird {
 
   updateSprite = () => {
     this.addSpeed(-options.volume);
-    this.speedY += GRAVITY / 70;
+    if(gravityOn) this.speedY += GRAVITY / 70;
     this.sprite.y += this.speedY;
     if(this.sprite.y > 480) {
       this.sprite.y = 480;
@@ -42,7 +46,8 @@ class Bird {
     }
     
   
-    this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
+    if(gravityOn) this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
+    else this.sprite.rotation = 0;
     this.lastY = this.sprite.y;
     let isCollide = false;
     const { x, y, width, height } = this.sprite;
@@ -68,6 +73,7 @@ class Bird {
   }
 
   reset() {
+    score = 0;
     this.sprite.x = canvasWidthHeight / 6;
     this.sprite.y = canvasWidthHeight / 2.5;
     this.speedY = 0;
@@ -89,13 +95,16 @@ class Bird {
 class Tube {
   private x: number;
   private y: number;
+  private passed: boolean = false;
+  private active: boolean = false; // whether the gravity-cancelling effect has been used for a given pass of the tube
   private tubeWidth = 25;
 
   private sprite = new PIXI.Graphics();
 
   reset(x: number = canvasWidthHeight + 300) {
     this.x = x;
-
+    this.passed = false;
+    this.active = false;
     const tubeMinHeight = 60;
     const randomNum = Math.random() * (canvasWidthHeight - 2 * tubeMinHeight);
     this.y = tubeMinHeight + randomNum;
@@ -115,6 +124,14 @@ class Tube {
   update() {
     this.x -= GAME_SPEED_X / 60;
     if (this.x < -this.tubeWidth) this.reset();
+    if (this.x < 20 && !this.passed) {
+      onTubePass();
+      this.passed = true;
+    }
+    if(this.x < canvasWidthHeight * .75 && !this.active) {
+      gravityOn = false; // turn off gravity on approach
+      this.active = true;
+    }
 
     this.sprite.clear();
     this.sprite.beginFill(0xffffff, 1);
@@ -127,6 +144,13 @@ class Tube {
     stage.addChild(this.sprite);
     this.reset(x);
   }
+}
+
+// This function will be called when the bird passes a tube fully.
+function onTubePass() {
+  score++;
+  document.getElementById('scoreP').innerHTML = "" + score;
+  gravityOn = true;
 }
 
 const renderer = PIXI.autoDetectRenderer(canvasWidthHeight, canvasWidthHeight, { backgroundColor: 0xc1c2c4 });

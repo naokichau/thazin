@@ -7,10 +7,10 @@ var BIRD_FRAME_LIST = [
     './images/frame-3.png',
     './images/frame-4.png',
 ];
+var score = 0;
+var gravityOn = false;
 var TUBE_POS_LIST = [
     canvasWidthHeight + 50,
-    canvasWidthHeight + 350,
-    canvasWidthHeight + 650
 ];
 var Bird = /** @class */ (function () {
     function Bird(stage, tubeList, onCollision) {
@@ -30,7 +30,8 @@ var Bird = /** @class */ (function () {
         };
         this.updateSprite = function () {
             _this.addSpeed(-options.volume);
-            _this.speedY += GRAVITY / 70;
+            if (gravityOn)
+                _this.speedY += GRAVITY / 70;
             _this.sprite.y += _this.speedY;
             if (_this.sprite.y > 480) {
                 _this.sprite.y = 480;
@@ -40,7 +41,10 @@ var Bird = /** @class */ (function () {
                 _this.sprite.y = 30;
                 _this.speedY = GRAVITY / 70;
             }
-            _this.sprite.rotation = Math.atan(_this.speedY / GAME_SPEED_X);
+            if (gravityOn)
+                _this.sprite.rotation = Math.atan(_this.speedY / GAME_SPEED_X);
+            else
+                _this.sprite.rotation = 0;
             _this.lastY = _this.sprite.y;
             var isCollide = false;
             var _a = _this.sprite, x = _a.x, y = _a.y, width = _a.width, height = _a.height;
@@ -74,6 +78,7 @@ var Bird = /** @class */ (function () {
         }
     };
     Bird.prototype.reset = function () {
+        score = 0;
         this.sprite.x = canvasWidthHeight / 6;
         this.sprite.y = canvasWidthHeight / 2.5;
         this.speedY = 0;
@@ -83,6 +88,8 @@ var Bird = /** @class */ (function () {
 }());
 var Tube = /** @class */ (function () {
     function Tube(stage, x) {
+        this.passed = false;
+        this.active = false; // whether the gravity-cancelling effect has been used for a given pass of the tube
         this.tubeWidth = 25;
         this.sprite = new PIXI.Graphics();
         stage.addChild(this.sprite);
@@ -91,6 +98,8 @@ var Tube = /** @class */ (function () {
     Tube.prototype.reset = function (x) {
         if (x === void 0) { x = canvasWidthHeight + 300; }
         this.x = x;
+        this.passed = false;
+        this.active = false;
         var tubeMinHeight = 60;
         var randomNum = Math.random() * (canvasWidthHeight - 2 * tubeMinHeight);
         this.y = tubeMinHeight + randomNum;
@@ -109,6 +118,14 @@ var Tube = /** @class */ (function () {
         this.x -= GAME_SPEED_X / 60;
         if (this.x < -this.tubeWidth)
             this.reset();
+        if (this.x < 20 && !this.passed) {
+            onTubePass();
+            this.passed = true;
+        }
+        if (this.x < canvasWidthHeight * .75 && !this.active) {
+            gravityOn = false; // turn off gravity on approach
+            this.active = true;
+        }
         this.sprite.clear();
         this.sprite.beginFill(0xffffff, 1);
         var _a = this, x = _a.x, y = _a.y, tubeWidth = _a.tubeWidth;
@@ -117,6 +134,12 @@ var Tube = /** @class */ (function () {
     };
     return Tube;
 }());
+// This function will be called when the bird passes a tube fully.
+function onTubePass() {
+    score++;
+    document.getElementById('scoreP').innerHTML = "" + score;
+    gravityOn = true;
+}
 var renderer = PIXI.autoDetectRenderer(canvasWidthHeight, canvasWidthHeight, { backgroundColor: 0xc1c2c4 });
 document.body.appendChild(renderer.view);
 var stage = new PIXI.Container();
