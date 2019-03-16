@@ -140,7 +140,8 @@ function onTubePass() {
     document.getElementById('scoreP').innerHTML = "" + score;
     gravityOn = true;
 }
-var renderer = PIXI.autoDetectRenderer(canvasWidthHeight, canvasWidthHeight, { backgroundColor: 0xc1c2c4 });
+// const renderer = PIXI.autoDetectRenderer(canvasWidthHeight, canvasWidthHeight, { backgroundColor: 0xc1c2c4 });
+var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight - 100, { backgroundColor: 0xc1c2c4 });
 document.body.appendChild(renderer.view);
 var stage = new PIXI.Container();
 stage.interactive = true;
@@ -153,6 +154,7 @@ PIXI.loader
 var bird;
 var button = document.querySelector('#start');
 function setup() {
+    beginDetect();
     bird = new Bird(stage, tubeList, function () {
         // Called when bird hit tube/ground/upper bound
         gameFailed = true;
@@ -171,7 +173,6 @@ function draw() {
     renderer.render(stage);
     requestAnimationFrame(draw);
 }
-beginDetect();
 button.addEventListener('click', function () {
     gameStarted = true;
     button.innerHTML = 'Retry';
@@ -214,7 +215,9 @@ function beginDetect() {
             mediaStreamSource = audioContext.createMediaStreamSource(stream);
             meter = createAudioMeter(audioContext);
             mediaStreamSource.connect(meter);
-            setTimeout(function () { recorder.start(); }, 500);
+            setTimeout(function () {
+                recorder.start();
+            }, 1000);
         });
     }
 }

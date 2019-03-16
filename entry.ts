@@ -25,7 +25,7 @@ class Bird {
   private textureCounter: number = 0;
   private lastY: number = 0;
   private updateTexture = () => {
-   
+
     if (this.isDead) return;
     this.sprite.texture = PIXI.loader.resources[BIRD_FRAME_LIST[this.textureCounter++]].texture;
 
@@ -36,11 +36,11 @@ class Bird {
     this.addSpeed(-options.volume);
     if(gravityOn) this.speedY += GRAVITY / 70;
     this.sprite.y += this.speedY;
-    if(this.sprite.y > 480) {
+    if (this.sprite.y > 480) {
       this.sprite.y = 480;
       this.speedY = 0;
     }
-    else if(this.sprite.y < 30) {
+    else if (this.sprite.y < 30) {
       this.sprite.y = 30;
       this.speedY = GRAVITY / 70;
     }
@@ -66,7 +66,7 @@ class Bird {
   }
 
   addSpeed(speedInc: number) {
-    if(!(this.sprite.y < 80)) {
+    if (!(this.sprite.y < 80)) {
       this.speedY += speedInc;
       this.speedY = Math.max(-GRAVITY / 3.5, this.speedY);
     }
@@ -146,6 +146,7 @@ class Tube {
   }
 }
 
+
 // This function will be called when the bird passes a tube fully.
 function onTubePass() {
   score++;
@@ -153,7 +154,8 @@ function onTubePass() {
   gravityOn = true;
 }
 
-const renderer = PIXI.autoDetectRenderer(canvasWidthHeight, canvasWidthHeight, { backgroundColor: 0xc1c2c4 });
+// const renderer = PIXI.autoDetectRenderer(canvasWidthHeight, canvasWidthHeight, { backgroundColor: 0xc1c2c4 });
+const renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight - 100, { backgroundColor: 0xc1c2c4 });
 document.body.appendChild(renderer.view);
 const stage = new PIXI.Container();
 stage.interactive = true;
@@ -168,6 +170,7 @@ PIXI.loader
 let bird;
 const button = document.querySelector('#start');
 function setup() {
+  beginDetect();
   bird = new Bird(stage, tubeList, () => {
     // Called when bird hit tube/ground/upper bound
     gameFailed = true;
@@ -187,7 +190,6 @@ function draw() {
   requestAnimationFrame(draw);
 }
 
-beginDetect();
 button.addEventListener('click', () => {
   gameStarted = true;
   button.innerHTML = 'Retry';
@@ -238,7 +240,9 @@ function beginDetect() {
       mediaStreamSource = audioContext.createMediaStreamSource(stream)
       meter = createAudioMeter(audioContext)
       mediaStreamSource.connect(meter)
-      setTimeout(() => { recorder.start() }, 500)
+      setTimeout(() => {
+        recorder.start()
+      }, 1000)
     })
   }
 }
