@@ -20,7 +20,7 @@ class Bird {
   private textureCounter: number = 0;
   private lastY: number = 0;
   private updateTexture = () => {
-   
+
     if (this.isDead) return;
     this.sprite.texture = PIXI.loader.resources[BIRD_FRAME_LIST[this.textureCounter++]].texture;
 
@@ -31,16 +31,16 @@ class Bird {
     this.addSpeed(-options.volume);
     this.speedY += GRAVITY / 70;
     this.sprite.y += this.speedY;
-    if(this.sprite.y > 480) {
+    if (this.sprite.y > 480) {
       this.sprite.y = 480;
       this.speedY = 0;
     }
-    else if(this.sprite.y < 30) {
+    else if (this.sprite.y < 30) {
       this.sprite.y = 30;
       this.speedY = GRAVITY / 70;
     }
-    
-  
+
+
     this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X); // fix this lol
     this.lastY = this.sprite.y;
     let isCollide = false;
@@ -50,9 +50,9 @@ class Bird {
       if (d.checkCollision(x - width / 2, y - height / 2, width, height)) isCollide = true;
     });
     if (y < -height / 2 || y > canvasWidthHeight + height / 2) isCollide = true;
-    if(y > canvasWidthHeight + height / 2) this.sprite.y = canvasWidthHeight + height / 2;
-    
-    if(y < -height / 2) this.sprite.y = -height / 2;
+    if (y > canvasWidthHeight + height / 2) this.sprite.y = canvasWidthHeight + height / 2;
+
+    if (y < -height / 2) this.sprite.y = -height / 2;
 
     if (isCollide) {
       this.onCollision();
@@ -62,7 +62,7 @@ class Bird {
   }
 
   addSpeed(speedInc: number) {
-    if(!(this.sprite.y < 80)) {
+    if (!(this.sprite.y < 80)) {
       this.speedY += speedInc;
       this.speedY = Math.max(-GRAVITY / 3.5, this.speedY);
     }
@@ -86,7 +86,7 @@ class Bird {
     // document.addEventListener('keydown', e => {
     //   if (e.keyCode == 32) this.addSpeed(-GRAVITY / 3);
     // });
-  
+
     // stage.on('pointerdown', () => this.addSpeed(-GRAVITY / 3))
 
     setInterval(this.updateTexture, 200);
@@ -137,7 +137,7 @@ class Tube {
   }
 }
 
-const renderer = PIXI.autoDetectRenderer(canvasWidthHeight, canvasWidthHeight, { backgroundColor: 0xc1c2c4 });
+const renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight - 100, { backgroundColor: 0xc1c2c4 });
 document.body.appendChild(renderer.view);
 const stage = new PIXI.Container();
 stage.interactive = true;
@@ -152,6 +152,7 @@ PIXI.loader
 let bird;
 const button = document.querySelector('#start');
 function setup() {
+  beginDetect();
   bird = new Bird(stage, tubeList, () => {
     // Called when bird hit tube/ground/upper bound
     gameFailed = true;
@@ -171,7 +172,6 @@ function draw() {
   requestAnimationFrame(draw);
 }
 
-beginDetect();
 button.addEventListener('click', () => {
   gameStarted = true;
   button.innerHTML = 'Retry';
@@ -222,7 +222,9 @@ function beginDetect() {
       mediaStreamSource = audioContext.createMediaStreamSource(stream)
       meter = createAudioMeter(audioContext)
       mediaStreamSource.connect(meter)
-      setTimeout(() => { recorder.start() }, 500)
+      setTimeout(() => {
+        recorder.start()
+      }, 1000)
     })
   }
 }
