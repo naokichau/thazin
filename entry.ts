@@ -1,6 +1,3 @@
-
-// import WaveBell from "wavebell"
-
 const canvasWidthHeight = Math.min(Math.min(window.innerHeight, window.innerWidth), 512);
 const GRAVITY = 9.8;
 const GAME_SPEED_X = 80;
@@ -77,7 +74,7 @@ class Bird {
     this.speedY = 0;
     this.isDead = false;
   }
-  
+
   constructor(stage: PIXI.Container, readonly tubeList: Tube[], readonly onCollision: () => void) {
     stage.addChild(this.sprite);
     this.sprite.anchor.set(0.5, 0.5);
@@ -174,6 +171,7 @@ function draw() {
   requestAnimationFrame(draw);
 }
 
+beginDetect();
 button.addEventListener('click', () => {
   gameStarted = true;
   button.innerHTML = 'Retry';
@@ -181,7 +179,10 @@ button.addEventListener('click', () => {
     gameFailed = false;
     tubeList.forEach((d, i) => d.reset(TUBE_POS_LIST[i]));
     bird.reset();
+    recorder.start()
   }
+  // document.removeEventListener('audio', handleTest)
+  startRecording()
   button.classList.add('hide');
 });
 
@@ -190,14 +191,38 @@ button.addEventListener('click', () => {
 var audioContext;
 var mediaStreamSource = null
 var meter = null
+const chunks = [];
+var recorder
+declare var MediaRecorder: any;
+let audioElement = null;
+
+const saveChunkToRecording = (event) => {
+  console.log(event.data)
+  chunks.push(event.data);
+};
+
+const saveRecording = () => {
+  const blob = new Blob(chunks, {
+    type: 'audio/mp4; codecs=opus'
+  });
+  const url = URL.createObjectURL(blob);
+
+  audioElement.setAttribute('src', url);
+};
+
 
 function beginDetect() {
   audioContext = new AudioContext()
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({audio: true}).then((stream) => {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+      audioElement = document.getElementById('audio-player');
+      recorder = new MediaRecorder(stream);
+      recorder.ondataavailable = saveChunkToRecording;
+      recorder.onstop = saveRecording;
       mediaStreamSource = audioContext.createMediaStreamSource(stream)
       meter = createAudioMeter(audioContext)
       mediaStreamSource.connect(meter)
+      setTimeout(() => { recorder.start() }, 500)
     })
   }
 }
@@ -251,8 +276,8 @@ function volumeAudioProcess(event) {
   for (var i = 0; i < bufLength; i++) {
     x = buf[i]
     if (Math.abs(x) >= options.clipLevel) {
-        options.clipping = true
-        options.lastClip = window.performance.now()
+      options.clipping = true
+      options.lastClip = window.performance.now()
     }
     sum += x * x * 2
   }
@@ -265,24 +290,13 @@ function volumeAudioProcess(event) {
   // want "fast attack, slow release."
   options.volume = Math.max(rms, options.volume * options.averaging)
   document.getElementById('audio-value').innerHTML = options.volume.toFixed(2)
+  const test = new CustomEvent('audio', { detail: buf });
+  document.dispatchEvent(test);
 }
 
-
-// var bell = new WaveBell();
-
-// bell.on('wave', function (e) {
-//   // draw oscilloscope
-//   // drawColumn(e.value);
-//   console.log(e.value)
-// });
-
-// bell.on('stop', function () {
-//   var blob = bell.result;
-//   // play recorded audio
-//   // playback(URL.createObjectURL(blob));
-// });
-
-// // 25 frames per second
-// bell.start(1000 / 25);
-
-beginDetect();
+function startRecording() {
+  setTimeout(() => {
+    console.log("record stopped")
+    recorder.stop();
+  }, 3000)
+}
