@@ -22,7 +22,7 @@
     }
 
     button {
-      margin-bottom: 30px;
+      margin: 0 auto;
       font-size: 20px;
       background-color: skyblue;
       /* Green */
@@ -32,7 +32,8 @@
       padding: 10px 15px;
       text-align: center;
       text-decoration: none;
-      display: inline-block;
+      border-radius: 10px;
+      display: table;
     }
 
     .hide {
@@ -50,13 +51,33 @@
     .audio {
       width: 100%;
     }
+
+    .box {
+      position: absolute;
+      z-index: 999;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%
+    }
+
+    .box-inner {
+      display: table;
+      margin: 0 auto;
+      height: auto;
+      width: 200px;
+    }
   </style>
 </head>
 
 <body>
-  <audio id="audio-player" src="" controls class="audio"></audio>
-  <div id="audio-value">Sample</div>
-  <button id='start'>Start</button>
+  <div class="box">
+    <div class="box-inner">
+      <audio id="audio-player" src="" controls class="audio"></audio>
+      <div id="audio-value" hidden>Sample</div>
+      <button id='start'>Start</button>
+    </div>
+  </div>
   <script src='./output/entry.js'></script>
 
 </body>
