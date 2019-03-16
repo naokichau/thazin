@@ -1,4 +1,3 @@
-// import WaveBell from "wavebell"
 var canvasWidthHeight = Math.min(Math.min(window.innerHeight, window.innerWidth), 512);
 var GRAVITY = 9.8;
 var GAME_SPEED_X = 80;
@@ -149,6 +148,7 @@ function draw() {
     renderer.render(stage);
     requestAnimationFrame(draw);
 }
+beginDetect();
 button.addEventListener('click', function () {
     gameStarted = true;
     button.innerHTML = 'Retry';
@@ -156,20 +156,42 @@ button.addEventListener('click', function () {
         gameFailed = false;
         tubeList.forEach(function (d, i) { return d.reset(TUBE_POS_LIST[i]); });
         bird.reset();
+        recorder.start();
     }
+    // document.removeEventListener('audio', handleTest)
+    startRecording();
     button.classList.add('hide');
 });
 // BEGIN AUDIO CONTROL CODE
 var audioContext;
 var mediaStreamSource = null;
 var meter = null;
+var chunks = [];
+var recorder;
+var audioElement = null;
+var saveChunkToRecording = function (event) {
+    console.log(event.data);
+    chunks.push(event.data);
+};
+var saveRecording = function () {
+    var blob = new Blob(chunks, {
+        type: 'audio/mp4; codecs=opus'
+    });
+    var url = URL.createObjectURL(blob);
+    audioElement.setAttribute('src', url);
+};
 function beginDetect() {
     audioContext = new AudioContext();
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+            audioElement = document.getElementById('audio-player');
+            recorder = new MediaRecorder(stream);
+            recorder.ondataavailable = saveChunkToRecording;
+            recorder.onstop = saveRecording;
             mediaStreamSource = audioContext.createMediaStreamSource(stream);
             meter = createAudioMeter(audioContext);
             mediaStreamSource.connect(meter);
+            setTimeout(function () { recorder.start(); }, 500);
         });
     }
 }
@@ -226,18 +248,12 @@ function volumeAudioProcess(event) {
     // want "fast attack, slow release."
     options.volume = Math.max(rms, options.volume * options.averaging);
     document.getElementById('audio-value').innerHTML = options.volume.toFixed(2);
+    var test = new CustomEvent('audio', { detail: buf });
+    document.dispatchEvent(test);
 }
-// var bell = new WaveBell();
-// bell.on('wave', function (e) {
-//   // draw oscilloscope
-//   // drawColumn(e.value);
-//   console.log(e.value)
-// });
-// bell.on('stop', function () {
-//   var blob = bell.result;
-//   // play recorded audio
-//   // playback(URL.createObjectURL(blob));
-// });
-// // 25 frames per second
-// bell.start(1000 / 25);
-beginDetect();
+function startRecording() {
+    setTimeout(function () {
+        console.log("record stopped");
+        recorder.stop();
+    }, 3000);
+}

@@ -38,16 +38,27 @@
     .hide {
       visibility: hidden;
     }
+
+    .wrapper {
+      padding: 2rem;
+    }
+
+    .audio-wrapper {
+      margin: 0 0 2rem 0;
+    }
+
+    .audio {
+      width: 100%;
+    }
   </style>
 </head>
 
 <body>
+  <audio id="audio-player" src="" controls class="audio"></audio>
   <div id="audio-value">Sample</div>
   <button id='start'>Start</button>
   <script src='./output/entry.js'></script>
-  <div>
 
-  </div>
 </body>
 
 </html>
