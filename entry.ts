@@ -37,7 +37,7 @@ class Bird {
 
   updateSprite = () => {
     this.addSpeed(-options.volume);
-    if(gravityOn) this.speedY += GRAVITY / 70;
+    if (gravityOn) this.speedY += GRAVITY / 70;
     this.sprite.y += this.speedY;
     if (this.sprite.y > canvasHeight - 50) {
       this.sprite.y = canvasHeight - 50;
@@ -47,8 +47,8 @@ class Bird {
       this.sprite.y = 150;
       this.speedY = GRAVITY / 70;
     }
-  
-    if(gravityOn) this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
+
+    if (gravityOn) this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
     else this.sprite.rotation = 0;
 
     this.lastY = this.sprite.y;
@@ -157,11 +157,30 @@ function onTubePass() {
 }
 
 // const renderer = PIXI.autoDetectRenderer(canvasWidthHeight, canvasWidthHeight, { backgroundColor: 0xc1c2c4 });
-const renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, { backgroundColor: 0xc1c2c4 });
+const renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, { backgroundColor: 0xffffff });
 
 document.body.appendChild(renderer.view);
 const stage = new PIXI.Container();
-stage.interactive = true;
+
+
+var landscapeTexture = PIXI.Texture.fromImage('/images/wall.jpg', false, 2, 20);
+
+// crop the texture to show just 100 px
+// var texture2 = new PIXI.Texture(landscapeTexture, new PIXI.Rectangle(0, 100, 960, 50));
+
+// new sprite
+var background = new PIXI.Sprite(landscapeTexture);
+
+
+background.anchor.x = 0;
+background.anchor.y = 0;
+
+background.position.x = 0;
+background.position.y = 0;
+
+stage.addChild(background);
+
+stage.interactive = false;
 stage.hitArea = new PIXI.Rectangle(0, 0, 1000, 1000);
 renderer.render(stage);
 
