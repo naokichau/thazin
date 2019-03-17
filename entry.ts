@@ -221,7 +221,9 @@ function onTubePass() {
 
 // called when a tube appears on screen
 function onTubeAppear() {
-  startRecording()
+  if (!gameFailed) {
+    startRecording()
+  }
 }
 
 
