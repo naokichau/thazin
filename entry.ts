@@ -34,12 +34,12 @@ const SYMBOL_LIST = [
 // END SYMBOL CODE
 
 // TODO: reduce dependency on this list we don't use
-const TUBE_POS_LIST: number[] = [
-  canvasWidth + 50,
-  // We will use only one tube for simplicity!
-  //canvasWidthHeight + 350,
-  //canvasWidthHeight + 650
-];
+// const TUBE_POS_LIST: number[] = [
+//   canvasWidth + 50,
+//   // We will use only one tube for simplicity!
+//   //canvasWidthHeight + 350,
+//   //canvasWidthHeight + 650
+// ];
 class Bird {
   private speedY: number = 0;
   private sprite = new PIXI.Sprite();
@@ -137,7 +137,8 @@ class Tube {
   }
 
   checkCollision(x: number, y: number, width: number, height: number) {
-    if (!(x + width < this.x || this.x + this.sprite.width < x || y + this.sprite.height < this.y)) {
+     if(((x > this.x && x < this.x + this.sprite.width)|| (x + width > this.x && x + width < this.x + this.sprite.width)) && ((y > this.y || y + height > this.y))) {
+    //if (!(x + width < this.x || this.x + this.sprite.width < x || y + height < this.y)) {
       return true;
     }
     return false;
@@ -245,7 +246,7 @@ button.addEventListener('click', () => {
   button.innerHTML = 'Retry';
   if (gameFailed) {
     gameFailed = false;
-    tubeList.forEach((d, i) => d.reset(TUBE_POS_LIST[i]));
+    tubeList.forEach((d, i) => d.reset(SYMBOL_LIST[i].start));
     bird.reset();
     recorder.start()
   }
