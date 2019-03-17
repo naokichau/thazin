@@ -8,6 +8,11 @@ const BIRD_FRAME_LIST = [
   './images/frame-4.png',
 ];
 
+var objectList = [{
+  id: "",
+  img: "",
+}]
+
 var score = 0;
 var gravityOn = true;
 var canvasWidth = window.innerWidth;
@@ -83,6 +88,7 @@ class Bird {
     if (isCollide) {
       this.onCollision();
       this.isDead = true;
+    } else {
     }
   }
 
@@ -136,9 +142,11 @@ class Tube {
   }
 
   checkCollision(x: number, y: number, width: number, height: number) {
-     if(((x > this.x && x < this.x + this.sprite.width)|| (x + width > this.x && x + width < this.x + this.sprite.width)) && ((y > this.y || y + height > this.y))) {
-    //if (!(x + width < this.x || this.x + this.sprite.width < x || y + height < this.y)) {
-      stopRecording()
+    if (((x > this.x && x < this.x + this.sprite.width) || (x + width > this.x && x + width < this.x + this.sprite.width)) && ((y > this.y || y + height > this.y))) {
+      //if (!(x + width < this.x || this.x + this.sprite.width < x || y + height < this.y)) {
+      if (!gameFailed) {
+        stopRecording()
+      }
       return true;
     }
     return false;
@@ -150,6 +158,9 @@ class Tube {
     if (this.x < canvasWidth / 7 && !this.passed) {
       onTubePass();
       stopRecording()
+      setTimeout(() => {
+        startRecording()
+      }, 500)
       this.passed = true;
 
     }
@@ -193,11 +204,12 @@ gameArea.appendChild(renderer.view);
 const stage = new PIXI.Container();
 
 
-var landscapeTexture = PIXI.Texture.fromImage('/images/wall.jpg', false, 10, 10);
+var landscapeTexture = PIXI.Texture.fromImage('/images/wall.jpg', false);
 
 // new sprite
 var background = new PIXI.Sprite(landscapeTexture);
-
+background.scale.x = 0.85;
+background.scale.y = 0.85;
 
 background.anchor.x = 0;
 background.anchor.y = 0;
@@ -239,6 +251,7 @@ function draw() {
 }
 
 button.addEventListener('click', () => {
+  audioRecords = []
   beginDetect();
   gameStarted = true;
   button.innerHTML = 'Retry';
@@ -258,7 +271,7 @@ button.addEventListener('click', () => {
 var audioContext;
 var mediaStreamSource = null
 var meter = null
-const chunks = [];
+var chunks = [];
 var audioRecords = [];
 var recorder
 declare var MediaRecorder: any;
@@ -273,11 +286,13 @@ const saveRecording = () => {
   const blob = new Blob(chunks, {
     type: 'audio/mp4; codecs=opus'
   });
+  chunks = []
   const url = URL.createObjectURL(blob);
-
-  audioRecords.push(blob)
-  // audioElement.setAttribute('src', url);
+  if (!gameFailed) {
+    audioRecords.push(blob)
+  }
   console.log(audioRecords)
+  // audioElement.setAttribute('src', url);
 };
 
 
@@ -370,7 +385,7 @@ function startRecording() {
 
 function stopRecording() {
   console.log("record stopped")
-  if recorder.state == "recording"{
+  if (recorder.state == "recording") {
     recorder.stop();
   }
 }
