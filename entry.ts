@@ -1,6 +1,6 @@
 const canvasWidthHeight = Math.min(Math.min(window.innerHeight, window.innerWidth), 512);
 const GRAVITY = 9.8;
-const GAME_SPEED_X = 120;
+const GAME_SPEED_X = 290;
 const BIRD_FRAME_LIST = [
   './images/frame-1.png',
   './images/frame-2.png',
@@ -26,7 +26,7 @@ class ImageObj {
 
 var objectList = [new ImageObj("sdf", "sdfsd")]
 
-
+var currentWordIdx = 0;
 var score = 0;
 var gravityOn = true;
 var canvasWidth = window.innerWidth;
@@ -160,7 +160,7 @@ class Tube {
     this.appeared = false;
     this.active = false;
     //console.log("Reset\n" + this.sprite.y + this.src + "\n" + canvasHeight + ", " + this.sprite.height);
-    
+
   }
 
   checkCollision(x: number, y: number, width: number, height: number) {
@@ -182,13 +182,10 @@ class Tube {
     if (this.sprite.x + this.sprite.width < canvasWidth / 7 && !this.passed) {
       onTubePass();
       stopRecording()
-      setTimeout(() => {
-        startRecording()
-      }, 500)
       this.passed = true;
 
     }
-    if(this.sprite.x < canvasWidth && !this.appeared) {
+    if (this.sprite.x < canvasWidth && !this.appeared) {
       onTubeAppear();
       this.appeared = true;
     }
@@ -224,7 +221,7 @@ function onTubePass() {
 
 // called when a tube appears on screen
 function onTubeAppear() {
-
+  startRecording()
 }
 
 
@@ -291,12 +288,13 @@ PIXI.loader
 
 let bird;
 const button = document.querySelector('#start');
+const buttonRetry = document.querySelector('#retry');
 function setup() {
   initTubes();
   bird = new Bird(stage, tubeList, () => {
     // Called when bird hit tube/ground/upper bound
     gameFailed = true;
-    button.classList.remove('hide');
+    // button.classList.remove('hide');
   });
   requestAnimationFrame(draw);
 }
@@ -316,21 +314,24 @@ button.addEventListener('click', () => {
   audioRecords = []
   beginDetect();
   gameStarted = true;
-  button.innerHTML = 'Retry';
-  if (gameFailed) {
-    gameFailed = false;
-    tubeList.forEach((d, i) => d.reset((i + 1) * canvasWidth * 1.5 + d.sprite.width));
-    bird.reset();
-  }
   button.classList.add('hide');
-  setTimeout(() => {
-    startRecording()
-  }, 400)
+});
+
+buttonRetry.addEventListener('click', () => {
+  currentWordIdx = 0
+  audioRecords = []
+  audioTracks.innerHTML = '';
+  beginDetect();
+  gameStarted = true;
+  gameFailed = false;
+  tubeList.forEach((d, i) => d.reset((i + 1) * canvasWidth * 1.5 + d.sprite.width));
+  bird.reset();
 });
 
 // BEGIN AUDIO CONTROL CODE
 
 var audioContext;
+var audioTracks = document.getElementById('audio-tracks')
 var mediaStreamSource = null
 var meter = null
 var chunks = [];
@@ -352,33 +353,45 @@ const saveRecording = () => {
   const url = URL.createObjectURL(blob);
   if (!gameFailed) {
     audioRecords.push(blob)
+
+    var itmbox = document.createElement("div")
+    itmbox.className = "audio-image-box"
+
+    var itmaudio = document.createElement("audio")
+    itmaudio.id = "audio-player" + currentWordIdx
+    itmaudio.setAttribute('src', url);
+    itmbox.appendChild(itmaudio)
+
+    var itmImg = document.createElement("div")
+    itmImg.className = "audio-image"
+    var img = BIRD_FRAME_LIST[currentWordIdx + 4]
+    itmImg.setAttribute("style", "background:url('" + img + "') no-repeat center")
+
+    var itmbtn = document.createElement("button")
+    itmbtn.className = "audio-btn"
+    itmaudio.id = "audio-btn" + currentWordIdx
+
+    var itmBtnImg = document.createElement("div")
+    itmBtnImg.className = "audio-btn-image"
+    setTimeout(() => {
+      itmbtn.addEventListener("click", () => {
+        itmaudio.play()
+      })
+    }, 500)
+
+
+    itmbtn.appendChild(itmBtnImg)
+    itmImg.appendChild(itmbtn)
+    itmbox.appendChild(itmImg)
+
+    audioTracks.appendChild(itmbox)
+    currentWordIdx = currentWordIdx + 1 % 5
+
   }
   console.log(audioRecords)
 
 
-  var itmbox = document.createElement("div")
-  itmbox.className = "audio-image-box"
 
-  var itmaudio = document.createElement("audio")
-  itmaudio.id = "test1"
-  itmbox.appendChild(itmaudio)
-
-  var itmImg = document.createElement("div")
-  itmImg.className = "audio-image"
-  itmImg.setAttribute("style", "background:url('./images/dogs.jpg') center")
-
-  var itmbtn = document.createElement("button")
-  itmbtn.className = "audio-btn"
-  var itmBtnImg = document.createElement("div")
-  itmBtnImg.className = "audio-btn-image"
-
-  itmbtn.appendChild(itmBtnImg)
-  itmImg.appendChild(itmbtn)
-  itmbox.appendChild(itmImg)
-
-  var audtrks = document.getElementById('audio-tracks')
-  audtrks.appendChild(itmbox)
-  // audioElement.setAttribute('src', url);
 };
 
 

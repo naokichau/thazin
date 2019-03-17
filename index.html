@@ -54,7 +54,7 @@
     }
 
     .num-score {
-      margin: 20px auto;
+      margin: -20px auto 5px;
       display: table;
       font-size: 60px;
       font-weight: bold;
@@ -71,6 +71,17 @@
       font-weight: bold;
       z-index: 999;
       background-color: #FF934F;
+    }
+
+    .retry-btn {
+      display: table;
+      margin: 0 auto;
+      width: 100px;
+      height: 30px;
+      font-size: 20px;
+      z-index: 999;
+      background-color: #FF934F;
+      border-radius: 15px;
     }
 
     .box-side {
@@ -114,9 +125,9 @@
     .box-audio-tracks {
       position: relative;
       display: block;
-      height: calc(100vh*8/9);
+      height: calc(100vh*7/9);
       width: 100%;
-      overflow-x: hidden;
+      overflow: hidden;
       overflow-y: scroll;
     }
 
@@ -188,6 +199,7 @@
       <div class="box-score">
         <h2 class="score-title">Score</h2>
         <p id='scoreP' class="num-score">0</p>
+        <button id='retry' class="retry-btn">retry</button>
       </div>
 
       <div id="audio-tracks" class="box-audio-tracks">
