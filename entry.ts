@@ -133,6 +133,7 @@ class Tube {
   // private y: number;
   private src: PIXI.Texture;
   private passed: boolean = false;
+  private appeared: boolean = false;
   private active: boolean = false; // whether the gravity-cancelling effect has been used for a given pass of the tube
 
   private sprite: PIXI.Sprite;
@@ -147,6 +148,7 @@ class Tube {
     this.sprite.y = canvasHeight - this.sprite.height;
     // need we do something with y?
     this.passed = false;
+    this.appeared = false;
     this.active = false;
     //console.log("Reset\n" + this.sprite.y + this.src + "\n" + canvasHeight + ", " + this.sprite.height);
     
@@ -177,6 +179,10 @@ class Tube {
       this.passed = true;
 
     }
+    if(this.sprite.x < canvasWidth && !this.appeared) {
+      onTubeAppear();
+      this.appeared = true;
+    }
 
     if (this.sprite.x < canvasWidth * .5 && !this.active) {
       gravityOn = false; // turn off gravity on approach
@@ -205,6 +211,11 @@ function onTubePass() {
   score++;
   document.getElementById('scoreP').innerHTML = "" + score;
   gravityOn = true;
+}
+
+// called when a tube appears on screen
+function onTubeAppear() {
+
 }
 
 
