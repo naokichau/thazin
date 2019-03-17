@@ -221,7 +221,7 @@ function initTubes() {
   console.log("initTubes")
   for(var i = 4; i < BIRD_FRAME_LIST.length; i++) { // we use now the one array for all textures - a hacky solution
     let textureHolder = PIXI.loader.resources[BIRD_FRAME_LIST[i]].texture;
-    tubeList.push(new Tube(stage, textureHolder, canvasWidth * 1.5 * (i -3) + textureHolder.width));
+    tubeList.push(new Tube(stage, textureHolder, canvasWidth * 1.5 * (i - 3) + textureHolder.width));
   }
   //tubeList = tubeTextures.map(t => new Tube(stage, t, ));
 }
