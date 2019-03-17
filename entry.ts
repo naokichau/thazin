@@ -8,10 +8,10 @@ const BIRD_FRAME_LIST = [
   './images/frame-4.png',
 ];
 
-let score = 0;
-let gravityOn = true;
-let canvasWidth = window.innerWidth;
-let canvasHeight = window.innerHeight;
+var score = 0;
+var gravityOn = true;
+var canvasWidth = window.innerWidth;
+var canvasHeight = window.innerHeight;
 
 // SYMBOL CODE
 
@@ -46,7 +46,6 @@ class Bird {
   private isDead: boolean;
 
   private textureCounter: number = 0;
-  private lastY: number = 0;
   private updateTexture = () => {
 
     if (this.isDead) return;
@@ -71,7 +70,6 @@ class Bird {
     if (gravityOn) this.sprite.rotation = Math.atan(this.speedY / GAME_SPEED_X);
     else this.sprite.rotation = 0;
 
-    this.lastY = this.sprite.y;
     let isCollide = false;
     const { x, y, width, height } = this.sprite;
     // object collision
@@ -207,7 +205,7 @@ background.position.y = 0;
 stage.addChild(background);
 
 stage.interactive = false;
-stage.hitArea = new PIXI.Rectangle(0, 0, 1000, 1000);
+stage.hitArea = new PIXI.Rectangle(0, 0, 1000, 1000); // do we need to change this?
 renderer.render(stage);
 
 const tubeList = SYMBOL_LIST.map(d => new Tube(stage, d));
