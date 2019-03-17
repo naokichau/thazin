@@ -6,6 +6,8 @@ const BIRD_FRAME_LIST = [
   './images/frame-2.png',
   './images/frame-3.png',
   './images/frame-4.png',
+  "./images/dogs.jpg",
+  "./images/cats.jpg",
 ];
 
 var score = 0;
@@ -18,28 +20,28 @@ var canvasHeight = window.innerHeight;
 class ImageSrc {
   public path: string;
   public start: number;
+  public texture: PIXI.Texture;
 
 
   constructor(p: string, s:number) {
     this.path = p;
     this.start = s;
+    this.texture = PIXI.Texture.from(p);
   }
 }
 // flesh out!
-const SYMBOL_LIST = [
-  new ImageSrc("./images/dogs.jpg", canvasWidth + 50),
-  new ImageSrc("./images/cats.jpg", canvasWidth * 2 + 50),
-]
+// const SYMBOL_LIST = [
+//   new ImageSrc("./images/dogs.jpg", canvasWidth + 50),
+//   new ImageSrc("./images/cats.jpg", canvasWidth * 2 + 50),
+// ]
+
+const TUBE_PATHS = [
+  "./images/dogs.jpg",
+  "./images/cats.jpg",
+];
 
 // END SYMBOL CODE
 
-// TODO: reduce dependency on this list we don't use
-// const TUBE_POS_LIST: number[] = [
-//   canvasWidth + 50,
-//   // We will use only one tube for simplicity!
-//   //canvasWidthHeight + 350,
-//   //canvasWidthHeight + 650
-// ];
 class Bird {
   private speedY: number = 0;
   private sprite = new PIXI.Sprite();
@@ -51,7 +53,7 @@ class Bird {
     if (this.isDead) return;
     this.sprite.texture = PIXI.loader.resources[BIRD_FRAME_LIST[this.textureCounter++]].texture;
 
-    if (this.textureCounter === BIRD_FRAME_LIST.length) this.textureCounter = 0;
+    if (this.textureCounter === 4) this.textureCounter = 0; // === BIRD_FRAME_LIST.length
   }
 
   updateSprite = () => {
@@ -115,65 +117,66 @@ class Bird {
 }
 
 class Tube {
-  private x: number;
-  private y: number;
-  private src: ImageSrc;
+  // private x: number;
+  // private y: number;
+  private src: PIXI.Texture;
   private passed: boolean = false;
   private active: boolean = false; // whether the gravity-cancelling effect has been used for a given pass of the tube
-  // private tubeWidth = 25;
 
-  private sprite: PIXI.Sprite; // = new PIXI.Sprite(PIXI.Texture.from(this.src.path));
+  private sprite: PIXI.Sprite;
 
   // TODO: we need to fix this
-  reset(x: number = canvasWidth + 2 * this.sprite.width) {
-    this.x = x;
-    this.y = canvasHeight - this.sprite.height;
+  reset(x: number = canvasWidth * 2 + this.sprite.width) {
+    // console.log(this.sprite.y + this.src.path + "\n" + canvasHeight + ", " + this.sprite.height);
+    // if(this.sprite.height == 1) {
+    //   this.sprite = new PIXI.Sprite(PIXI.Texture.from(this.src.path));
+    // }
+    this.sprite.x = x;
+    this.sprite.y = canvasHeight - this.sprite.height;
+    // need we do something with y?
     this.passed = false;
     this.active = false;
-    //const tubeMinHeight = 60;
-    //const randomNum = Math.random() * (canvasHeight - (canvasHeight / 100) * tubeMinHeight);
+    console.log("Reset\n" + this.sprite.y + this.src + "\n" + canvasHeight + ", " + this.sprite.height);
     
   }
 
   checkCollision(x: number, y: number, width: number, height: number) {
-     if(((x > this.x && x < this.x + this.sprite.width)|| (x + width > this.x && x + width < this.x + this.sprite.width)) && ((y > this.y || y + height > this.y))) {
-    //if (!(x + width < this.x || this.x + this.sprite.width < x || y + height < this.y)) {
+    if(((x > this.sprite.x && x < this.sprite.x + this.sprite.width) 
+     || (x + width > this.sprite.x && x + width < this.sprite.x + this.sprite.width))
+     && ((y > this.sprite.y || y + height > this.sprite.y))) {
       return true;
     }
     return false;
   }
 
   update() {
-    this.x -= GAME_SPEED_X / 60;
-    if (this.x < -this.sprite.width) this.reset();
-    if (this.x < canvasWidth / 7 && !this.passed) {
+    console.log("update tube!")
+    this.sprite.x -= GAME_SPEED_X / 60;
+    if (this.sprite.x < -this.sprite.width) this.reset();
+    if (this.sprite.x + this.sprite.width < canvasWidth / 7 && !this.passed) {
       onTubePass();
       this.passed = true;
     }
-    if (this.x < canvasWidth * .5 && !this.active) {
+
+    if (this.sprite.x < canvasWidth * .5 && !this.active) {
       gravityOn = false; // turn off gravity on approach
       this.active = true;
     }
 
-    this.sprite.x = this.x;
-    this.sprite.y = this.y;
-    
-    
-
-    // TODO: change to make it use a sprite!
-    // this.sprite.clear();
-    // this.sprite.beginFill(0xffffff, 1);
-    // const { x, y, tubeWidth } = this;
-    // this.sprite.drawRect(x, y, tubeWidth, canvasHeight);
-    // this.sprite.endFill();
+    // this.sprite.x = this.x;
+    // this.sprite.y = this.y; //theoretically not necessary, but...
+    console.log("Updated tube! X: " + this.sprite.x)
   }
 
-  constructor(stage: PIXI.Container, img: ImageSrc) {
+  constructor(stage: PIXI.Container, img: PIXI.Texture, x: number) {
     this.src = img;
-    this.sprite = new PIXI.Sprite(PIXI.Texture.from(this.src.path));
+    this.sprite = new PIXI.Sprite(img);
+    this.reset(x);
+    //this.sprite.anchor.set(0, 0);
     stage.addChild(this.sprite);
-    // this.sprite.anchor.set(this.x, this.y);
-    this.reset(img.start);
+    
+    // this.y = canvasHeight - this.sprite.height;
+    // this.sprite.y = this.y;
   }
 }
 
@@ -184,11 +187,13 @@ function onTubePass() {
   gravityOn = true;
 }
 
+
+
+
 const renderer = PIXI.autoDetectRenderer(window.innerWidth * 3 / 4, window.innerHeight, { backgroundColor: 0xffffff });
 var gameArea = document.getElementById('box-game')
 gameArea.appendChild(renderer.view);
 const stage = new PIXI.Container();
-
 
 var landscapeTexture = PIXI.Texture.fromImage('/images/wall.jpg', false, 10, 10);
 
@@ -208,7 +213,36 @@ stage.interactive = false;
 stage.hitArea = new PIXI.Rectangle(0, 0, 1000, 1000); // do we need to change this?
 renderer.render(stage);
 
-const tubeList = SYMBOL_LIST.map(d => new Tube(stage, d));
+// TUBE INIT CODE
+
+var tubeTextures = [];
+var tubeList = [];
+function initTubes() {
+  console.log("initTubes")
+  for(var i = 4; i < BIRD_FRAME_LIST.length; i++) { // we use now the one array for all textures - a hacky solution
+    let textureHolder = PIXI.loader.resources[BIRD_FRAME_LIST[i]].texture;
+    tubeList.push(new Tube(stage, textureHolder, canvasWidth * 1.5 * (i -3) + textureHolder.width));
+  }
+  //tubeList = tubeTextures.map(t => new Tube(stage, t, ));
+}
+
+
+// don't use this
+// function test(callback) {
+//     console.log("running test")
+//     for(var i = 0; i < TUBE_PATHS.length; i++) {
+//       tubeTextures.push(PIXI.Texture.fromImage(TUBE_PATHS[i]));
+//       console.log(tubeTextures[i])
+//     }
+//     console.log("done with test")
+//     callback();
+// }
+// console.log("just before running test")
+// test(initTubes);
+// const tubeList = SYMBOL_LIST.map(d => new Tube(stage, d));
+
+// END TUBE INIT CODE
+
 PIXI.loader
   .add(BIRD_FRAME_LIST)
   .load(setup);
@@ -216,6 +250,7 @@ PIXI.loader
 let bird;
 const button = document.querySelector('#start');
 function setup() {
+  initTubes();
   bird = new Bird(stage, tubeList, () => {
     // Called when bird hit tube/ground/upper bound
     gameFailed = true;
@@ -241,7 +276,7 @@ button.addEventListener('click', () => {
   button.innerHTML = 'Retry';
   if (gameFailed) {
     gameFailed = false;
-    tubeList.forEach((d, i) => d.reset(SYMBOL_LIST[i].start));
+    tubeList.forEach((d, i) => d.reset((i + 1) * canvasWidth * 1.5 + d.sprite.width));
     bird.reset();
     recorder.start()
   }
