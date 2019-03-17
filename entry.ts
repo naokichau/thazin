@@ -8,6 +8,9 @@ const BIRD_FRAME_LIST = [
   './images/frame-4.png',
   "./images/dogs.jpg",
   "./images/cats.jpg",
+  "./images/apple.png",
+  "./images/pineapple.png",
+  "./images/book.png",
 ];
 
 var objectList = [{
@@ -22,28 +25,31 @@ var canvasHeight = window.innerHeight;
 
 // SYMBOL CODE
 
-class ImageSrc {
-  public path: string;
-  public start: number;
-  public texture: PIXI.Texture;
+// class ImageSrc {
+//   public path: string;
+//   public start: number;
+//   public texture: PIXI.Texture;
 
 
-  constructor(p: string, s: number) {
-    this.path = p;
-    this.start = s;
-    this.texture = PIXI.Texture.from(p);
-  }
-}
+//   constructor(p: string, s: number) {
+//     this.path = p;
+//     this.start = s;
+//     this.texture = PIXI.Texture.from(p);
+//   }
+// }
 // flesh out!
 // const SYMBOL_LIST = [
 //   new ImageSrc("./images/dogs.jpg", canvasWidth + 50),
 //   new ImageSrc("./images/cats.jpg", canvasWidth * 2 + 50),
 // ]
 
-const TUBE_PATHS = [
-  "./images/dogs.jpg",
-  "./images/cats.jpg",
-];
+// const TUBE_PATHS = [
+//   "./images/dogs.jpg",
+//   "./images/cats.jpg",
+//   "./images/apple.png",
+//   "./images/pineapple.png",
+//   "./images/book.png",
+// ];
 
 // END SYMBOL CODE
 
@@ -132,7 +138,7 @@ class Tube {
   private sprite: PIXI.Sprite;
 
   // TODO: we need to fix this
-  reset(x: number = canvasWidth * 2 + this.sprite.width) {
+  reset(x: number = canvasWidth * (BIRD_FRAME_LIST.length - 4) + this.sprite.width) {
     // console.log(this.sprite.y + this.src.path + "\n" + canvasHeight + ", " + this.sprite.height);
     // if(this.sprite.height == 1) {
     //   this.sprite = new PIXI.Sprite(PIXI.Texture.from(this.src.path));
@@ -142,7 +148,7 @@ class Tube {
     // need we do something with y?
     this.passed = false;
     this.active = false;
-    console.log("Reset\n" + this.sprite.y + this.src + "\n" + canvasHeight + ", " + this.sprite.height);
+    //console.log("Reset\n" + this.sprite.y + this.src + "\n" + canvasHeight + ", " + this.sprite.height);
     
   }
 
@@ -159,7 +165,7 @@ class Tube {
   }
 
   update() {
-    console.log("update tube!")
+    //console.log("update tube!")
     this.sprite.x -= GAME_SPEED_X / 60;
     if (this.sprite.x < -this.sprite.width) this.reset();
     if (this.sprite.x + this.sprite.width < canvasWidth / 7 && !this.passed) {
@@ -179,7 +185,7 @@ class Tube {
 
     // this.sprite.x = this.x;
     // this.sprite.y = this.y; //theoretically not necessary, but...
-    console.log("Updated tube! X: " + this.sprite.x)
+    //console.log("Updated tube! X: " + this.sprite.x)
   }
 
   constructor(stage: PIXI.Container, img: PIXI.Texture, x: number) {
