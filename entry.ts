@@ -266,7 +266,7 @@ function initTubes() {
   console.log("initTubes")
   for (var i = 4; i < BIRD_FRAME_LIST.length; i++) { // we use now the one array for all textures - a hacky solution
     let textureHolder = PIXI.loader.resources[BIRD_FRAME_LIST[i]].texture;
-    tubeList.push(new Tube(stage, textureHolder, canvasWidth * 1.5 * (i - 3) + textureHolder.width));
+    tubeList.push(new Tube(stage, textureHolder, canvasWidth * (i - 3) + textureHolder.width));
   }
   //tubeList = tubeTextures.map(t => new Tube(stage, t, ));
 }
@@ -330,7 +330,7 @@ buttonRetry.addEventListener('click', () => {
   beginDetect();
   gameStarted = true;
   gameFailed = false;
-  tubeList.forEach((d, i) => d.reset((i + 1) * canvasWidth * 1.5 + d.sprite.width));
+  tubeList.forEach((d, i) => d.reset((i + 1) * canvasWidth + d.sprite.width));
   bird.reset();
 });
 
