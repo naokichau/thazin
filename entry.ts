@@ -10,10 +10,30 @@ const BIRD_FRAME_LIST = [
 
 let score = 0;
 let gravityOn = true;
-//const renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, { backgroundColor: 0xc1c2c4 });
 let canvasWidth = window.innerWidth;
 let canvasHeight = window.innerHeight;
 
+// SYMBOL CODE
+
+class ImageSrc {
+  public path: string;
+  public start: number;
+
+
+  constructor(p: string, s:number) {
+    this.path = p;
+    this.start = s;
+  }
+}
+// flesh out!
+const SYMBOL_LIST = [
+  new ImageSrc("./images/dogs.jpg", canvasWidth + 50),
+  new ImageSrc("./images/cats.jpg", canvasWidth * 2 + 50),
+]
+
+// END SYMBOL CODE
+
+// TODO: reduce dependency on this list we don't use
 const TUBE_POS_LIST: number[] = [
   canvasWidth + 50,
   // We will use only one tube for simplicity!
@@ -99,27 +119,26 @@ class Bird {
 class Tube {
   private x: number;
   private y: number;
+  private src: ImageSrc;
   private passed: boolean = false;
   private active: boolean = false; // whether the gravity-cancelling effect has been used for a given pass of the tube
-  private tubeWidth = 25;
+  // private tubeWidth = 25;
 
-  private sprite = new PIXI.Graphics();
+  private sprite: PIXI.Sprite; // = new PIXI.Sprite(PIXI.Texture.from(this.src.path));
 
-  reset(x: number = canvasWidth + 300) {
+  // TODO: we need to fix this
+  reset(x: number = canvasWidth + 2 * this.sprite.width) {
     this.x = x;
+    this.y = canvasHeight - this.sprite.height;
     this.passed = false;
     this.active = false;
-    const tubeMinHeight = 60;
-    const randomNum = Math.random() * (canvasHeight - (canvasHeight / 100) * tubeMinHeight);
-    this.y = tubeMinHeight + randomNum;
+    //const tubeMinHeight = 60;
+    //const randomNum = Math.random() * (canvasHeight - (canvasHeight / 100) * tubeMinHeight);
+    
   }
 
   checkCollision(x: number, y: number, width: number, height: number) {
-    // if (!(x + width < this.x || this.x + this.tubeWidth < x || this.y < y)) {
-    //   console.log("whaa");
-    //   return true;
-    // }
-    if (!(x + width < this.x || this.x + this.tubeWidth < x || y + height < this.y)) {
+    if (!(x + width < this.x || this.x + this.sprite.width < x || y + this.sprite.height < this.y)) {
       return true;
     }
     return false;
@@ -127,7 +146,7 @@ class Tube {
 
   update() {
     this.x -= GAME_SPEED_X / 60;
-    if (this.x < -this.tubeWidth) this.reset();
+    if (this.x < -this.sprite.width) this.reset();
     if (this.x < canvasWidth / 7 && !this.passed) {
       onTubePass();
       this.passed = true;
@@ -137,16 +156,25 @@ class Tube {
       this.active = true;
     }
 
-    this.sprite.clear();
-    this.sprite.beginFill(0xffffff, 1);
-    const { x, y, tubeWidth } = this;
-    this.sprite.drawRect(x, y, tubeWidth, canvasHeight);
-    this.sprite.endFill();
+    this.sprite.x = this.x;
+    this.sprite.y = this.y;
+    
+    
+
+    // TODO: change to make it use a sprite!
+    // this.sprite.clear();
+    // this.sprite.beginFill(0xffffff, 1);
+    // const { x, y, tubeWidth } = this;
+    // this.sprite.drawRect(x, y, tubeWidth, canvasHeight);
+    // this.sprite.endFill();
   }
 
-  constructor(stage: PIXI.Container, x: number) {
+  constructor(stage: PIXI.Container, img: ImageSrc) {
+    this.src = img;
+    this.sprite = new PIXI.Sprite(PIXI.Texture.from(this.src.path));
     stage.addChild(this.sprite);
-    this.reset(x);
+    // this.sprite.anchor.set(this.x, this.y);
+    this.reset(img.start);
   }
 }
 
@@ -181,7 +209,7 @@ stage.interactive = false;
 stage.hitArea = new PIXI.Rectangle(0, 0, 1000, 1000);
 renderer.render(stage);
 
-const tubeList = TUBE_POS_LIST.map(d => new Tube(stage, d));
+const tubeList = SYMBOL_LIST.map(d => new Tube(stage, d));
 PIXI.loader
   .add(BIRD_FRAME_LIST)
   .load(setup);
