@@ -222,7 +222,11 @@ function onTubePass() {
 // called when a tube appears on screen
 function onTubeAppear() {
   if (!gameFailed) {
-    startRecording()
+    try {
+      startRecording()
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 
@@ -239,8 +243,8 @@ var landscapeTexture = PIXI.Texture.fromImage('/images/wall.jpg', false);
 
 // new sprite
 var background = new PIXI.Sprite(landscapeTexture);
-background.scale.x = 0.85;
-background.scale.y = 0.85;
+background.scale.x = 0.85 * window.innerWidth / 1048;
+background.scale.y = 0.85 * window.innerHeight / 821;
 
 background.anchor.x = 0;
 background.anchor.y = 0;
