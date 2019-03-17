@@ -22,27 +22,14 @@
 
     button {
       margin: 0 auto;
-      font-size: 20px;
-      background-color: #FF934F;
-      /* Green */
       border: none;
-      color: white;
       cursor: pointer;
-      padding: 10px 15px;
       text-align: center;
       text-decoration: none;
     }
 
     .hide {
       visibility: hidden;
-    }
-
-    .wrapper {
-      padding: 2rem;
-    }
-
-    .audio-wrapper {
-      margin: 0 0 2rem 0;
     }
 
     .audio {
@@ -72,7 +59,6 @@
       font-size: 60px;
       font-weight: bold;
       color: #FF934F;
-      z-index: 99;
     }
 
     .start-btn {
@@ -83,9 +69,11 @@
       height: 100%;
       font-size: 60px;
       font-weight: bold;
+      z-index: 999;
+      background-color: #FF934F;
     }
 
-    .box-score {
+    .box-side {
       position: relative;
       width: calc(100vw*1/4);
       height: 100vh;
@@ -94,7 +82,7 @@
       overflow: hidden;
     }
 
-    .box-score-inner {
+    .box-side-inner {
       width: 100%;
       height: 100%;
       position: absolute;
@@ -107,9 +95,83 @@
       z-index: 99999;
     }
 
+    .box-score {
+      position: relative;
+      height: calc(100vh*2/9);
+      width: 100%;
+      overflow: hidden;
+
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
     .score-title {
       width: 100%;
       text-align: center;
+    }
+
+    .box-audio-tracks {
+      position: relative;
+      display: block;
+      height: calc(100vh*8/9);
+      width: 100%;
+      overflow-x: hidden;
+      overflow-y: scroll;
+    }
+
+    .audio-track {
+      width: 100%;
+      height: 100px;
+    }
+
+    .audio-image-box {
+      position: relative;
+      padding-top: 5px;
+      width: 100%;
+      height: 128px;
+      overflow: hidden;
+      display: block;
+    }
+
+    .audio-image {
+      position: relative;
+      display: table;
+      margin: 0 auto;
+      border-radius: 25px;
+      width: 170px;
+      height: 115px;
+      border: 1px solid #ccc;
+      background-size: contain !important;
+      background-color: #fff !important;
+      overflow: hidden;
+    }
+
+    .audio-btn {
+      border: none;
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      background-color: rgba(0, 0, 0, 0.5)
+    }
+
+    .audio-btn-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: 50px !important;
+      z-index: 999;
+      background: url('./images/speaker.png') no-repeat center
+    }
+
+    .audio-btn:hover {
+      opacity: 1;
     }
   </style>
 </head>
@@ -118,18 +180,25 @@
   <div class="box">
     <div id='box-game' class="box-inner">
     </div>
-    <div class="box-score">
-      <div class="box-score-inner">
+    <div class="box-side">
+      <div class="box-side-inner">
       </div>
       <button id='start' class="start-btn">Start</button>
-      <!-- <audio id="audio-player" src="" class="audio"></audio> -->
       <div id="audio-value" hidden></div>
-      <div class="score">
+      <div class="box-score">
         <h2 class="score-title">Score</h2>
         <p id='scoreP' class="num-score">0</p>
       </div>
 
-
+      <div id="audio-tracks" class="box-audio-tracks">
+        <!-- <div id="image-box" class="audio-image-box">
+          <audio id="audio-player" src=""></audio>
+          <div class="audio-image" style="background:url('./images/dogs.jpg') center"> <button class="audio-btn">
+              <div class="audio-btn-image">
+              </div>
+            </button></div>
+        </div> -->
+      </div>
 
     </div>
   </div>

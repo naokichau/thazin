@@ -13,10 +13,19 @@ const BIRD_FRAME_LIST = [
   "./images/book.png",
 ];
 
-var objectList = [{
-  id: "",
-  img: "",
-}]
+
+class ImageObj {
+  public url: string;
+  public id: string;
+
+  constructor(url: string, id: string) {
+    this.url = url;
+    this.id = id;
+  }
+}
+
+var objectList = [new ImageObj("sdf", "sdfsd")]
+
 
 var score = 0;
 var gravityOn = true;
@@ -153,9 +162,9 @@ class Tube {
   }
 
   checkCollision(x: number, y: number, width: number, height: number) {
-    if(((x > this.sprite.x && x < this.sprite.x + this.sprite.width) 
-     || (x + width > this.sprite.x && x + width < this.sprite.x + this.sprite.width))
-     && ((y > this.sprite.y || y + height > this.sprite.y))) {
+    if (((x > this.sprite.x && x < this.sprite.x + this.sprite.width)
+      || (x + width > this.sprite.x && x + width < this.sprite.x + this.sprite.width))
+      && ((y > this.sprite.y || y + height > this.sprite.y))) {
       if (!gameFailed) {
         stopRecording()
       }
@@ -194,7 +203,7 @@ class Tube {
     this.reset(x);
     //this.sprite.anchor.set(0, 0);
     stage.addChild(this.sprite);
-    
+
     // this.y = canvasHeight - this.sprite.height;
     // this.sprite.y = this.y;
   }
@@ -241,7 +250,7 @@ var tubeTextures = [];
 var tubeList = [];
 function initTubes() {
   console.log("initTubes")
-  for(var i = 4; i < BIRD_FRAME_LIST.length; i++) { // we use now the one array for all textures - a hacky solution
+  for (var i = 4; i < BIRD_FRAME_LIST.length; i++) { // we use now the one array for all textures - a hacky solution
     let textureHolder = PIXI.loader.resources[BIRD_FRAME_LIST[i]].texture;
     tubeList.push(new Tube(stage, textureHolder, canvasWidth * 1.5 * (i - 3) + textureHolder.width));
   }
@@ -334,6 +343,30 @@ const saveRecording = () => {
     audioRecords.push(blob)
   }
   console.log(audioRecords)
+
+
+  var itmbox = document.createElement("div")
+  itmbox.className = "audio-image-box"
+
+  var itmaudio = document.createElement("audio")
+  itmaudio.id = "test1"
+  itmbox.appendChild(itmaudio)
+
+  var itmImg = document.createElement("div")
+  itmImg.className = "audio-image"
+  itmImg.setAttribute("style", "background:url('./images/dogs.jpg') center")
+
+  var itmbtn = document.createElement("button")
+  itmbtn.className = "audio-btn"
+  var itmBtnImg = document.createElement("div")
+  itmBtnImg.className = "audio-btn-image"
+
+  itmbtn.appendChild(itmBtnImg)
+  itmImg.appendChild(itmbtn)
+  itmbox.appendChild(itmImg)
+
+  var audtrks = document.getElementById('audio-tracks')
+  audtrks.appendChild(itmbox)
   // audioElement.setAttribute('src', url);
 };
 
