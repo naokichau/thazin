@@ -3,28 +3,27 @@
 
 <head>
   <title>Thazin</title>
+  <link rel="stylesheet" href="./animate.css">
   <script src='./pixi.js'></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     html,
     body {
       background: #fff;
-      height: 100%;
-      width: 100%;
+      height: 100vh;
+      width: 100vw;
       margin: 0;
-    }
-
-    body {
-      display: flex;
       align-items: center;
       justify-content: center;
       flex-direction: column;
+      overflow: hidden;
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif
     }
 
     button {
       margin: 0 auto;
       font-size: 20px;
-      background-color: skyblue;
+      background-color: #FF934F;
       /* Green */
       border: none;
       color: white;
@@ -32,8 +31,6 @@
       padding: 10px 15px;
       text-align: center;
       text-decoration: none;
-      border-radius: 10px;
-      display: table;
     }
 
     .hide {
@@ -54,33 +51,89 @@
 
     .box {
       position: absolute;
-      z-index: 999;
+      z-index: 99;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%
+      width: 100vw;
+      height: 100vh;
     }
 
     .box-inner {
+      float: left;
+      width: calc(100vw*3/4);
+      height: 100vh;
+      display: inline-block;
+      overflow: hidden;
+    }
+
+    .num-score {
+      margin: 20px auto;
       display: table;
-      margin: 0 auto;
-      height: auto;
-      width: 200px;
+      font-size: 60px;
+      font-weight: bold;
+      color: #FF934F;
+      z-index: 99;
+    }
+
+    .start-btn {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      font-size: 60px;
+      font-weight: bold;
+    }
+
+    .box-score {
+      position: relative;
+      width: calc(100vw*1/4);
+      height: 100vh;
+      background-color: #fff;
+      display: inline-block;
+      overflow: hidden;
+    }
+
+    .box-score-inner {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      box-shadow: 37px 6px 89px -31px rgba(0, 0, 0, 0.4) inset;
+      -webkit-box-shadow: 37px 6px 89px -31px rgba(0, 0, 0, 0.4) inset;
+      -moz-box-shadow: 37px 6px 89px -31px rgba(0, 0, 0, 0.4) inset;
+      z-index: 99999;
+    }
+
+    .score-title {
+      width: 100%;
+      text-align: center;
     }
   </style>
 </head>
 
 <body>
   <div class="box">
-    <div class="box-inner">
-      <audio id="audio-player" src="" controls class="audio hide"></audio>
-      <div id="audio-value" hidden>Sample</div>
-      <button id='start'>Start</button>
+    <div id='box-game' class="box-inner">
+    </div>
+    <div class="box-score">
+      <div class="box-score-inner">
+      </div>
+      <button id='start' class="start-btn">Start</button>
+      <audio id="audio-player" src="" class="audio"></audio>
+      <div id="audio-value" hidden></div>
+      <div class="score">
+        <h2 class="score-title">Score</h2>
+        <p id='scoreP' class="num-score">0</p>
+      </div>
+
+
+
     </div>
   </div>
   <script src='./output/entry.js'></script>
-  <!-- <img id='prompt' src='./images/8-cell-orig.jpg' alt="Prompt Image"> -->
-  <p id='scoreP' hidden>whaa</p>
 </body>
 
 </html>
