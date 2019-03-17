@@ -12,6 +12,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@types/pixi.js": "^4.5.3"
+    "@types/pixi.js": "^4.5.3",
+    "animate.css": "^3.7.0"
   }
 }

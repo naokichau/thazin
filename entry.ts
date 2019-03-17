@@ -101,6 +101,7 @@ class Bird {
     this.sprite.y = canvasHeight / 2.5;
     this.speedY = 0;
     this.isDead = false;
+    document.getElementById('scoreP').innerHTML = "" + score;
   }
 
   constructor(stage: PIXI.Container, readonly tubeList: Tube[], readonly onCollision: () => void) {
@@ -151,7 +152,7 @@ class Tube {
       onTubePass();
       this.passed = true;
     }
-    if(this.x < canvasWidth * .5 && !this.active) {
+    if (this.x < canvasWidth * .5 && !this.active) {
       gravityOn = false; // turn off gravity on approach
       this.active = true;
     }
@@ -185,17 +186,13 @@ function onTubePass() {
   gravityOn = true;
 }
 
-// const renderer = PIXI.autoDetectRenderer(canvasWidthHeight, canvasWidthHeight, { backgroundColor: 0xc1c2c4 });
-const renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, { backgroundColor: 0xffffff });
-
-document.body.appendChild(renderer.view);
+const renderer = PIXI.autoDetectRenderer(window.innerWidth * 3 / 4, window.innerHeight, { backgroundColor: 0xffffff });
+var gameArea = document.getElementById('box-game')
+gameArea.appendChild(renderer.view);
 const stage = new PIXI.Container();
 
 
-var landscapeTexture = PIXI.Texture.fromImage('/images/wall.jpg', false, 2, 20);
-
-// crop the texture to show just 100 px
-// var texture2 = new PIXI.Texture(landscapeTexture, new PIXI.Rectangle(0, 100, 960, 50));
+var landscapeTexture = PIXI.Texture.fromImage('/images/wall.jpg', false, 10, 10);
 
 // new sprite
 var background = new PIXI.Sprite(landscapeTexture);
@@ -221,7 +218,6 @@ PIXI.loader
 let bird;
 const button = document.querySelector('#start');
 function setup() {
-  beginDetect();
   bird = new Bird(stage, tubeList, () => {
     // Called when bird hit tube/ground/upper bound
     gameFailed = true;
@@ -242,6 +238,7 @@ function draw() {
 }
 
 button.addEventListener('click', () => {
+  beginDetect();
   gameStarted = true;
   button.innerHTML = 'Retry';
   if (gameFailed) {
@@ -250,7 +247,6 @@ button.addEventListener('click', () => {
     bird.reset();
     recorder.start()
   }
-  // document.removeEventListener('audio', handleTest)
   startRecording()
   button.classList.add('hide');
 });
@@ -281,6 +277,7 @@ const saveRecording = () => {
 
 
 function beginDetect() {
+  console.log("sdngsld")
   audioContext = new AudioContext()
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
@@ -293,7 +290,7 @@ function beginDetect() {
       mediaStreamSource.connect(meter)
       setTimeout(() => {
         recorder.start()
-      }, 1000)
+      }, 700)
     })
   }
 }
