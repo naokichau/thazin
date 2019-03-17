@@ -20,7 +20,7 @@ class ImageSrc {
   public start: number;
 
 
-  constructor(p: string, s:number) {
+  constructor(p: string, s: number) {
     this.path = p;
     this.start = s;
   }
@@ -132,12 +132,13 @@ class Tube {
     this.active = false;
     //const tubeMinHeight = 60;
     //const randomNum = Math.random() * (canvasHeight - (canvasHeight / 100) * tubeMinHeight);
-    
+
   }
 
   checkCollision(x: number, y: number, width: number, height: number) {
      if(((x > this.x && x < this.x + this.sprite.width)|| (x + width > this.x && x + width < this.x + this.sprite.width)) && ((y > this.y || y + height > this.y))) {
     //if (!(x + width < this.x || this.x + this.sprite.width < x || y + height < this.y)) {
+      stopRecording()
       return true;
     }
     return false;
@@ -148,7 +149,9 @@ class Tube {
     if (this.x < -this.sprite.width) this.reset();
     if (this.x < canvasWidth / 7 && !this.passed) {
       onTubePass();
+      stopRecording()
       this.passed = true;
+
     }
     if (this.x < canvasWidth * .5 && !this.active) {
       gravityOn = false; // turn off gravity on approach
@@ -157,8 +160,8 @@ class Tube {
 
     this.sprite.x = this.x;
     this.sprite.y = this.y;
-    
-    
+
+
 
     // TODO: change to make it use a sprite!
     // this.sprite.clear();
@@ -243,10 +246,11 @@ button.addEventListener('click', () => {
     gameFailed = false;
     tubeList.forEach((d, i) => d.reset(SYMBOL_LIST[i].start));
     bird.reset();
-    recorder.start()
   }
-  startRecording()
   button.classList.add('hide');
+  setTimeout(() => {
+    startRecording()
+  }, 400)
 });
 
 // BEGIN AUDIO CONTROL CODE
@@ -255,6 +259,7 @@ var audioContext;
 var mediaStreamSource = null
 var meter = null
 const chunks = [];
+var audioRecords = [];
 var recorder
 declare var MediaRecorder: any;
 let audioElement = null;
@@ -270,12 +275,13 @@ const saveRecording = () => {
   });
   const url = URL.createObjectURL(blob);
 
-  audioElement.setAttribute('src', url);
+  audioRecords.push(blob)
+  // audioElement.setAttribute('src', url);
+  console.log(audioRecords)
 };
 
 
 function beginDetect() {
-  console.log("sdngsld")
   audioContext = new AudioContext()
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
@@ -286,9 +292,6 @@ function beginDetect() {
       mediaStreamSource = audioContext.createMediaStreamSource(stream)
       meter = createAudioMeter(audioContext)
       mediaStreamSource.connect(meter)
-      setTimeout(() => {
-        recorder.start()
-      }, 700)
     })
   }
 }
@@ -361,8 +364,17 @@ function volumeAudioProcess(event) {
 }
 
 function startRecording() {
-  setTimeout(() => {
-    console.log("record stopped")
-    recorder.stop();
-  }, 3000)
+  console.log("record started")
+  recorder.start();
 }
+
+function stopRecording() {
+  console.log("record stopped")
+  if recorder.state == "recording"{
+    recorder.stop();
+  }
+}
+
+// function stopStream(stream){
+//   stream.getTracks().forEach( track => track.stop() );
+//   };
